@@ -49,7 +49,7 @@ You will be taken through an OAuth flow to authorize access to your Groundbase a
 
 ### API key alternative
 
-If your client does not support OAuth, generate a key in Groundbase under Settings, then Integrations, then MCP, and send it as a bearer token:
+If your client does not support OAuth, generate a key in Groundbase under **Settings → AI integrations** and send it as a bearer token:
 
 ```
 Authorization: Bearer gbm_your_key_here
@@ -67,19 +67,21 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 **Messaging** — SMS (send now, schedule, cancel, read threads), email, voicemail drops
 
+**Templates** — reusable email and SMS templates, full CRUD, plus merge tags for personalization
+
 **Outreach** — campaigns with audience preview and analytics, multi-step cadences with enrollment control
 
 **Automation** — workflows (create, run, pause, resume), inbound and outbound webhooks
 
-**Context** — activity feed, dashboard summary, merge tags
+**Context** — activity feed, dashboard summary, Resend configuration
 
 Call `tools/list` against the endpoint for the full schema.
 
 ## Security
 
 - Every tool call is scoped to the authenticated account. There is no cross-account access.
-- OAuth tokens and API keys are revocable from Groundbase settings.
-- The server holds no CRM data of its own. It authenticates you and forwards to the Groundbase API.
+- Both API keys and OAuth authorizations are listed and revocable at **Settings → AI integrations**. Revoking takes effect on the next request.
+- The server holds no CRM data of its own. It authenticates you and forwards each call to the Groundbase API.
 
 ## Docs and support
 
