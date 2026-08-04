@@ -1,5 +1,7 @@
 # Groundbase MCP Server
 
+[![smithery badge](https://smithery.ai/badge/adam-jsdb/Groundbase)](https://smithery.ai/servers/adam-jsdb/Groundbase)
+
 Connect Claude, Cursor, or any MCP client to [Groundbase](https://groundbasecrm.com), a $9/month CRM for solo operators.
 
 This is a **remote** MCP server. There is nothing to install and nothing to run locally. You point your client at a URL and authenticate.
