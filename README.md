@@ -14,10 +14,10 @@ Groundbase exposes **actions**:
 
 - `sms_send_now` and `sms_send_scheduled` dispatch real text messages through your own Twilio account
 - `email_send` sends
-- `cadences_enroll` puts a contact into a multi-step sequence
+- `campaigns_manage` starts a drip that stops for anyone who replies
 - `workflows_run_now` fires an automation
+- `invoices_send` emails an invoice
 - `voicemail_drops_drop` leaves a voicemail
-- `campaigns_manage` runs email and SMS campaigns
 
 So "text the twelve people who went quiet after a demo" ends with twelve messages sent, not twelve drafts to copy somewhere else.
 
@@ -29,7 +29,7 @@ So "text the twelve people who went quiet after a demo" ends with twelve message
 | Transport | Streamable HTTP |
 | Protocol version | `2025-06-18` |
 | Auth | OAuth 2.1, or a Groundbase API key |
-| Tools | 86 |
+| Tools | 119 |
 
 Health check: [`https://mcp.groundbasecrm.com/health`](https://mcp.groundbasecrm.com/health)
 
@@ -63,19 +63,23 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 ## Tools
 
-86 tools across:
+119 tools across:
 
-**Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields
+**Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields, saved views
 
-**Messaging** — SMS (send now, schedule, cancel, read threads), email, voicemail drops
+**Messaging** — SMS (send now, schedule, cancel, read threads, opt-out list), email (send, read threads, several mailboxes), voicemail drops
 
 **Templates** — reusable email and SMS templates, full CRUD, plus merge tags for personalization
 
-**Outreach** — campaigns with audience preview and analytics, multi-step cadences with enrollment control
+**Outreach** — email and SMS campaigns with audience preview and analytics; drips with per-step exit rules; ongoing campaigns that enrol new contacts as they arrive
 
-**Automation** — workflows (create, run, pause, resume), inbound and outbound webhooks
+**Invoicing** — draft, issue, send and void invoices; record and reverse payments; invoice settings
 
-**Context** — activity feed, dashboard summary, Resend configuration
+**Automation** — workflows (create, run, pause, resume, run history), inbound and outbound webhooks
+
+**Scheduling** — meeting types for booking links
+
+**Context** — activity feed, dashboard summary, Twilio balance, Resend configuration
 
 Call `tools/list` against the endpoint for the full schema.
 
