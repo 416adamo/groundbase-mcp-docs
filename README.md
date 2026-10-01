@@ -12,7 +12,7 @@ Most CRM MCP servers expose records. You can list contacts, create a deal, updat
 
 Groundbase exposes **actions**:
 
-- `sms_send_now` and `sms_send_scheduled` dispatch real text messages through your own Twilio account
+- `sms_send` dispatches real text messages (now or scheduled) through your own Twilio account
 - `email_send` sends
 - `campaigns_manage` starts a drip that stops for anyone who replies
 - `workflows_run_now` fires an automation
@@ -63,7 +63,7 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 ## Tools
 
-132 tools across:
+103 tools across:
 
 **Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields, saved views
 
