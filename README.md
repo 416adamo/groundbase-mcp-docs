@@ -63,7 +63,7 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 ## Tools
 
-119 tools across:
+134 tools across:
 
 **Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields, saved views
 
@@ -73,7 +73,11 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 **Outreach** — email and SMS campaigns with audience preview and analytics; drips with per-step exit rules; ongoing campaigns that enrol new contacts as they arrive
 
-**Invoicing** — draft, issue, send and void invoices; record and reverse payments; invoice settings
+**Invoicing** — draft, issue, send and void invoices; record and reverse payments; invoice settings, billing profiles and a price list
+
+**Quotes** — draft, issue, send, accept, decline, void and convert quotes to invoices
+
+**Time tracking** — log time, start and stop a timer, list and edit entries
 
 **Automation** — workflows (create, run, pause, resume, run history), inbound and outbound webhooks
 
@@ -81,7 +85,7 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 **Context** — activity feed, dashboard summary, Twilio balance, Resend configuration
 
-Call `tools/list` against the endpoint for the full schema.
+Call `tools/list` against the endpoint for the full schema. Each tool carries MCP annotations (read-only, destructive, reaches outside the account), so a client can ask before anything that deletes or sends. Arguments are checked against the schema before anything runs.
 
 ## Security
 
