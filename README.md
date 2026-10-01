@@ -63,7 +63,7 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 ## Tools
 
-134 tools across:
+132 tools across:
 
 **Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields, saved views
 
