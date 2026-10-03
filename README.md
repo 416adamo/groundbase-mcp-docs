@@ -27,9 +27,9 @@ So "text the twelve people who went quiet after a demo" ends with twelve message
 |---|---|
 | Endpoint | `https://mcp.groundbasecrm.com/mcp` |
 | Transport | Streamable HTTP |
-| Protocol version | `2025-06-18` |
+| Protocol version | `2025-06-18` (also `2025-03-26`, `2024-11-05`) |
 | Auth | OAuth 2.1, or a Groundbase API key |
-| Tools | 119 |
+| Tools | 104 |
 
 Health check: [`https://mcp.groundbasecrm.com/health`](https://mcp.groundbasecrm.com/health)
 
@@ -63,7 +63,7 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 ## Tools
 
-103 tools across:
+104 tools across:
 
 **Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields, saved views
 
@@ -92,6 +92,8 @@ Call `tools/list` against the endpoint for the full schema. Each tool carries MC
 - Every tool call is scoped to the authenticated account. There is no cross-account access.
 - Both API keys and OAuth authorizations are listed and revocable at **Settings → AI integrations**. Revoking takes effect on the next request.
 - The server holds no CRM data of its own. It authenticates you and forwards each call to the Groundbase API.
+- A client can revoke its own token at `https://mcp.groundbasecrm.com/revoke` (RFC 7009).
+- Sends are limited per account per hour through an AI connection or API key: 100 texts and emails, 10 campaign launches or bulk sends, 30 manual workflow runs; at most 50 recipients per email and 500 contacts per tag change.
 
 ## Docs and support
 
