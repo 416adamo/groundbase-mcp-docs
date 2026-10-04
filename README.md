@@ -63,27 +63,33 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 ## Tools
 
-104 tools across:
+104 tools, as `tools/list` returns them to a customer account:
 
-**Records** — contacts, companies, deals, deal stages, tasks, notes, tags, custom fields, saved views
+| Area | Tools |
+|---|---|
+| Contacts, companies, deals | `contacts_list`, `contacts_create`, `contacts_update`, `contacts_delete`, `companies_list`, `companies_create`, `companies_update`, `companies_delete`, `deals_list`, `deals_create`, `deals_update`, `deals_delete`, `deal_stages_list`, `deal_stages_create`, `deal_stages_update` |
+| Tasks, notes, addresses | `tasks_list`, `tasks_create`, `tasks_update`, `tasks_delete`, `notes_list`, `notes_create`, `notes_update`, `notes_delete`, `addresses_list`, `addresses_create`, `addresses_update`, `addresses_delete` |
+| Tags, custom fields, saved views | `tags_list`, `tags_create`, `tags_update`, `tags_delete`, `tags_apply`, `custom_fields_list`, `custom_fields_create`, `custom_fields_update`, `custom_fields_delete`, `custom_fields_set_value`, `saved_views_list`, `saved_views_create`, `saved_views_delete` |
+| SMS | `sms_send` (now or scheduled), `sms_list`, `sms_cancel_scheduled`, `sms_optouts` (list, add, remove) |
+| Email | `email_send`, `email_accounts_list`, `email_list_threads`, `email_get_thread`, `email_suppressions_manage` (the do-not-email list: list, add, remove) |
+| Templates and merge tags | `templates_list`, `templates_create`, `templates_update`, `templates_delete` (SMS and email), `merge_tags_list` |
+| Campaigns and email sending | `campaigns_manage` (create, schedule, send, pause, resume, stop, preview audience, newsletters), `campaigns_analytics` (stats and per-recipient rows), `sending_settings` (daily email send cap), `resend_manage` (status, domains, tracking webhook, test send, disconnect) |
+| Invoicing | `invoices_list`, `invoices_save_draft`, `invoices_issue`, `invoices_send`, `invoices_void`, `invoice_payments_record`, `invoice_payments_reverse`, `invoice_items_list`, `invoice_items_save`, `invoice_settings_get`, `invoice_settings_update`, `billing_profiles_list`, `billing_profiles_save` |
+| Quotes | `quotes_list`, `quotes_save_draft`, `quotes_issue`, `quotes_send`, `quotes_record_outcome` (accepted or declined), `quotes_convert`, `quotes_void` |
+| Time tracking | `time_log`, `time_timer_start`, `time_timer_stop`, `time_list`, `time_update` |
+| Forms | `forms_manage` (lead-capture forms: list, templates, get, create, update, delete, submissions) |
+| Automation | `workflows_list` (and run history), `workflows_create`, `workflows_update` (including pause and resume), `workflows_delete`, `workflows_run_now`, `inbound_webhooks_manage`, `outbound_webhooks_manage` |
+| Scheduling | `meeting_types_list`, `meeting_types_create`, `meeting_types_update`, `meeting_types_delete` |
+| Calls and voicemail drops | `calls_list`, `voicemail_drops_list`, `voicemail_drops_create`, `voicemail_drops_update`, `voicemail_drops_delete`, `voicemail_drops_drop` |
+| Context | `activity_list`, `dashboard_summary`, `twilio_balance_get` |
 
-**Messaging** — SMS (send now, schedule, cancel, read threads, opt-out list), email (send, read threads, several mailboxes), voicemail drops
+**Voiding an invoice with money on it.** `invoices_void` will not void an issued invoice that has payments or credit notes recorded on it: the call fails with `409 INVOICE_HAS_PAYMENTS`. Ask the user, and only after they confirm, call again with `confirm_paid: true`. Voiding never refunds or notifies anyone; the payments stay recorded.
 
-**Templates** — reusable email and SMS templates, full CRUD, plus merge tags for personalization
+**What is not a tool.** Refunds, credit notes, repeat invoices, merging contacts, importing, and putting logged time on an invoice are done in the Groundbase app, as are connecting Twilio, a mailbox, Resend or Google Calendar, and the subscription.
 
-**Outreach** — email and SMS campaigns with audience preview and analytics; drips with per-step exit rules; ongoing campaigns that enrol new contacts as they arrive
+**Activity feed.** Changes to contacts, companies, deals, tasks, notes, texts, invoices, quotes, payments and time entries write an activity row, as they do from the app; rows are not marked as coming from an AI client. Changes to tags, templates, campaigns, workflows and webhooks, and emails sent with `email_send`, write none.
 
-**Invoicing** — draft, issue, send and void invoices; record and reverse payments; invoice settings, billing profiles and a price list
-
-**Quotes** — draft, issue, send, accept, decline, void and convert quotes to invoices
-
-**Time tracking** — log time, start and stop a timer, list and edit entries
-
-**Automation** — workflows (create, run, pause, resume, run history), inbound and outbound webhooks
-
-**Scheduling** — meeting types for booking links
-
-**Context** — activity feed, dashboard summary, Twilio balance, Resend configuration
+Older tool names that clients may have saved (for example `contacts_get`, `sms_send_now`, `invoices_create_draft`) still answer calls but are not listed.
 
 Call `tools/list` against the endpoint for the full schema. Each tool carries MCP annotations (read-only, destructive, reaches outside the account), so a client can ask before anything that deletes or sends. Arguments are checked against the schema before anything runs.
 
