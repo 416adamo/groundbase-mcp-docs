@@ -87,7 +87,7 @@ Any client that speaks Streamable HTTP works. Configuration differs by client, s
 
 **Voiding an invoice with money on it.** `invoices_void` will not void an issued invoice that has payments or credit notes recorded on it: the call fails with `409 INVOICE_HAS_PAYMENTS`. Ask the user, and only after they confirm, call again with `confirm_paid: true`. Voiding never refunds or notifies anyone; the payments stay recorded.
 
-**What is not a tool.** Refunds, credit notes, repeat invoices, merging contacts, importing, and putting logged time on an invoice are done in the Groundbase app, as are connecting Twilio, a mailbox, Resend or Google Calendar, and the subscription.
+**What is not a tool.** Card refunds and importing are done in the Groundbase app, as are connecting Twilio, a mailbox, Resend or Google Calendar, changing the Resend connection (`resend_manage` reads its status and domains only), and the subscription. Credit notes, repeat invoices, merging contacts and putting logged time on an invoice are tools (see the table above).
 
 **Activity feed.** Changes to contacts, companies, deals, tasks, notes, texts, invoices, quotes, payments and time entries write an activity row, as they do from the app; rows are not marked as coming from an AI client. Changes to tags, templates, campaigns, workflows and webhooks, and emails sent with `email_send`, write none.
 
