@@ -2,6 +2,7 @@
   "name": "groundbase-mcp-bridge",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Local (stdio) bridge to the hosted Groundbase MCP server at https://mcp.groundbasecrm.com/mcp",
   "type": "module",
   "bin": { "groundbase-mcp": "server.mjs" },

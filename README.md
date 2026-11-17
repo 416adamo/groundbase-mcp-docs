@@ -142,4 +142,4 @@ Questions, bugs, or a tool you wish existed: open an issue here, or email **mcp@
 
 ## Note on this repository
 
-This repo is documentation and issue tracking for a hosted service, plus the local bridge described above (`server.mjs`, `tools.json`, `Dockerfile`). The hosted server's own source is not open source. If you are looking for the endpoint, it is at the top of this file.
+This repo is documentation and issue tracking for a hosted service, plus the local bridge described above (`server.mjs`, `tools.json`, `Dockerfile`). The files in this repo are under the [MIT License](LICENSE). The hosted server's own source is not open source and is not covered by it. If you are looking for the endpoint, it is at the top of this file.
