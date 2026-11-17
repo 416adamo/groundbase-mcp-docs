@@ -1,0 +1,3597 @@
+[
+  {
+    "name": "contacts_list",
+    "title": "List contacts",
+    "description": "Search and filter contacts (tag, status, company, unsubscribed, sort), or `id` for one in full (tags, addresses, custom fields, recent activity). deleted: to restore. duplicates: to merge.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "One contact by id."
+        },
+        "search": {
+          "type": "string",
+          "description": "Matches name, email, phone."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Only contacts with this tag (name or id)."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Only contacts at this company."
+        },
+        "unsubscribed": {
+          "type": "string",
+          "enum": [
+            "any",
+            "email",
+            "sms",
+            "none"
+          ],
+          "description": "Opted out of any / email / sms, or none."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status name or id, or none."
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "name",
+            "created",
+            "updated",
+            "recent"
+          ],
+          "description": "recent = last contacted. Default name."
+        },
+        "deleted": {
+          "type": "boolean",
+          "description": "List recently deleted contacts instead."
+        },
+        "duplicates": {
+          "type": "boolean",
+          "description": "Groups sharing an email or phone instead."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Default 50."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List contacts",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "contacts_manage",
+    "title": "Manage contacts",
+    "description": "Change contacts. create (firstName required; tags by name), update (omitted fields unchanged), delete (soft; confirm first), merge (keepId + mergeIds: duplicates folded in, then deleted; confirm), restore (ids from contacts_list deleted), bulk_update (ids + set {city, source, position, companyId, status} and/or customField).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete",
+            "merge",
+            "restore",
+            "bulk_update"
+          ]
+        },
+        "firstName": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "email": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Used by: create, update. Normalised to E.164."
+        },
+        "position": {
+          "type": "string",
+          "description": "Used by: create, update. Job title."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tag names; missing ones are created."
+        },
+        "status": {
+          "type": "string",
+          "description": "Used by: create, update. Status name; default if omitted."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "keepId": {
+          "type": "string",
+          "description": "merge: the contact that stays."
+        },
+        "mergeIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 20,
+          "description": "merge: the duplicates folded into it."
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required for: bulk_update; optional for: restore. restore: deleted ids."
+        },
+        "deletedAt": {
+          "type": "string",
+          "description": "restore: a deleted_at (undoes that whole delete)."
+        },
+        "set": {
+          "type": "object",
+          "description": "bulk_update: { city?, source?, position?, companyId?, status? }.",
+          "properties": {
+            "city": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "position": {
+              "type": "string"
+            },
+            "companyId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        },
+        "customField": {
+          "type": "object",
+          "description": "bulk_update: { key (field id or key), value }.",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "key"
+          ]
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage contacts",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "companies_list",
+    "title": "List companies",
+    "description": "Search companies, or pass `id` to fetch one in full (employees, deals, addresses, custom fields).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Company id. Returns that one company."
+        },
+        "search": {
+          "type": "string",
+          "description": "Matches name and website."
+        },
+        "deleted": {
+          "type": "boolean",
+          "description": "List recently deleted companies instead (to restore)."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Default 50."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List companies",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "companies_manage",
+    "title": "Manage companies",
+    "description": "Change companies. create (name required; tags by name), update (omitted fields unchanged), delete (soft; confirm first), restore (ids from companies_list deleted).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete",
+            "restore"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "website": {
+          "type": "string",
+          "description": "Used by: create, update. Include https://."
+        },
+        "industry": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "city": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "state": {
+          "type": "string",
+          "description": "Used by: create, update. State or province."
+        },
+        "country": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "description": "restore: deleted ids."
+        },
+        "deletedAt": {
+          "type": "string",
+          "description": "restore: a deleted_at (undoes that whole delete)."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage companies",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "deals_list",
+    "title": "List deals",
+    "description": "List deals with stage, value, contact and company, or pass `id` to fetch one deal with its notes and tasks.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "One deal."
+        },
+        "search": {
+          "type": "string",
+          "description": "Title, contact or company."
+        },
+        "stageId": {
+          "type": "string",
+          "description": "From deal_stages_list."
+        },
+        "pipelineId": {
+          "type": "string"
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "deleted": {
+          "type": "boolean",
+          "description": "Recently deleted (to restore)."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List deals",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "deals_manage",
+    "title": "Manage deals",
+    "description": "Change deals. create (title and stageId from deal_stages_list), update (stageId moves it; omitted fields unchanged), delete (soft; confirm first), restore (ids from deals_list deleted).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete",
+            "restore"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "stageId": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "valueCents": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Used by: create, update. In the account's default currency (deals have no currency of their own)."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "closeAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Used by: create, update. Expected close date, YYYY-MM-DD or ISO 8601."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "lostReason": {
+          "type": "string"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "description": "restore: deleted ids."
+        },
+        "deletedAt": {
+          "type": "string",
+          "description": "restore: a deleted_at (undoes that whole delete)."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage deals",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "deal_stages_list",
+    "title": "List deal stages",
+    "description": "List pipelines, their stages (stage pipeline_id) and contact statuses. Call before creating or moving a deal.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "title": "List deal stages",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "deal_stages_manage",
+    "title": "Manage deal stages",
+    "description": "Pipeline stages. create (isWon / isLost mark the end stages), update (by id, or `order`: every stage id left to right), delete (deals in it need reassignTo; never the last stage; confirm first).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "color": {
+          "type": "string",
+          "description": "Used by: create, update. Hex, e.g. \"#0EA5E9\"."
+        },
+        "position": {
+          "type": "number",
+          "description": "Zero-based order."
+        },
+        "isWon": {
+          "type": "boolean"
+        },
+        "isLost": {
+          "type": "boolean"
+        },
+        "probability": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Used by: create, update. Win %, for the forecast."
+        },
+        "pipelineId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: delete; optional for: update."
+        },
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every stage id, in order."
+        },
+        "reassignTo": {
+          "type": "string",
+          "description": "delete: the stage its deals move to."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage deal stages",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "tasks_list",
+    "title": "List tasks",
+    "description": "List tasks, events and meetings (default: open, every kind), or `id` for one. Google Calendar events show as kind event. color_id: 1 Lavender, 2 Sage, 3 Grape, 4 Flamingo, 5 Banana, 6 Tangerine, 7 Peacock, 8 Graphite, 9 Blueberry, 10 Basil, 11 Tomato; null default. from+to adds repeating dates (is_virtual: no item of its own; root_id = the series).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Task id. Returns that one item."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "task",
+            "event",
+            "meeting"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "done",
+            "all"
+          ],
+          "description": "Default open."
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "dealId": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string",
+          "description": "ISO 8601; due on/after."
+        },
+        "to": {
+          "type": "string",
+          "description": "ISO 8601; due on/before."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List tasks",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "tasks_manage",
+    "title": "Manage tasks",
+    "description": "Tasks, events and meetings (the Calendar page in the apps). create (a meeting texts the contact only with textContact: true; ask first), update (status \"done\" completes; contactId/companyId/dealId relink; moving a meeting re-sends its texts), delete (confirm; repeating tasks need scope; remove_from_google only if the user says).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "task",
+            "event",
+            "meeting"
+          ],
+          "description": "Used by: create, update. Default task."
+        },
+        "title": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "dueAt": {
+          "type": "string",
+          "description": "Used by: create, update. ISO 8601, for tasks."
+        },
+        "startAt": {
+          "type": "string",
+          "description": "Used by: create, update. ISO 8601, for events/meetings."
+        },
+        "endAt": {
+          "type": "string",
+          "description": "Used by: create, update. ISO 8601."
+        },
+        "location": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "dealId": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "recurrence": {
+          "type": "string",
+          "enum": [
+            "daily",
+            "weekly",
+            "monthly",
+            "yearly",
+            "weekdays",
+            ""
+          ],
+          "description": "Used by: create, update. Repeats relative to dueAt. Tasks only."
+        },
+        "textContact": {
+          "type": "boolean",
+          "description": "Meetings: text the contact a confirmation and reminders. Default false."
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "Lavender",
+            "Sage",
+            "Grape",
+            "Flamingo",
+            "Banana",
+            "Tangerine",
+            "Peacock",
+            "Graphite",
+            "Blueberry",
+            "Basil",
+            "Tomato",
+            "default"
+          ],
+          "description": "Used by: create, update. Calendar colour, the same palette as Google Calendar; syncs both ways. \"default\" = the colour of its kind."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "done"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "occurrence",
+            "series"
+          ],
+          "description": "Repeating tasks: \"occurrence\" deletes this date only, \"series\" the whole series. A series' first task needs one of them."
+        },
+        "remove_from_google": {
+          "type": "boolean",
+          "description": "Default false. True also removes it from Google Calendar: the event, or for scope \"occurrence\" just that date. Only after the user confirms."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage tasks",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "addresses_manage",
+    "title": "Manage addresses",
+    "description": "Postal addresses on a contact or company (contactId or companyId). list, create, update (omitted fields unchanged), delete (confirm first). A contact or company fetched by id already includes its addresses.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Used by: list, create, update, delete."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Used by: list, create, update, delete."
+        },
+        "label": {
+          "type": "string",
+          "description": "Used by: create, update. e.g. 'home', 'office'."
+        },
+        "street": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "city": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "province": {
+          "type": "string",
+          "description": "Used by: create, update. State, province or region."
+        },
+        "postal_code": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "country": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "is_primary": {
+          "type": "boolean",
+          "description": "Used by: create, update. Make this the primary address (demotes the old one)."
+        },
+        "addressId": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage addresses",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "notes_list",
+    "title": "List notes",
+    "description": "List the notes on a contact, company or deal (pass exactly one of contactId / companyId / dealId).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "dealId": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Default 50."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List notes",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "notes_manage",
+    "title": "Manage notes",
+    "description": "Notes on a contact, company or deal. create (body, plus contactId / companyId / dealId), update, delete (confirm first).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "dealId": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string",
+          "description": "Required for: create, update."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage notes",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "tags_list",
+    "title": "List tags",
+    "description": "List the user's tags with their ids.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "title": "List tags",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "tags_manage",
+    "title": "Manage tags",
+    "description": "Tags. create, update (rename / recolour), delete (removes it from everyone; confirm first), apply (tagId to contactIds; remove: true takes it off). Applying a tag can start workflows listening for it.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete",
+            "apply"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "color": {
+          "type": "string",
+          "description": "Used by: create, update. Hex, e.g. \"#B91C1C\"."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "tagId": {
+          "type": "string"
+        },
+        "contactIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500
+        },
+        "remove": {
+          "type": "boolean",
+          "description": "Remove the tag instead of adding it."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage tags",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "templates_list",
+    "title": "List templates",
+    "description": "List SMS and/or email templates (name, body, subject), or pass `id` to fetch one.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "sms",
+            "email"
+          ],
+          "description": "Omit for both."
+        },
+        "id": {
+          "type": "string",
+          "description": "Template id. Returns that one template."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List templates",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "templates_manage",
+    "title": "Manage templates",
+    "description": "Saved message templates (type sms or email; email needs a subject). create, update, delete (confirm first). Merge tags: custom_fields_list with mergeTags.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "sms",
+            "email"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "body": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Used by: create, update. Email only; required there."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage templates",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "custom_fields_list",
+    "title": "List custom fields",
+    "description": "List custom field definitions: field_key (used in {{cf.<field_key>}}), name, type, options, entity_type. mergeTags: true lists every merge tag usable in texts, emails and workflows ({{first_name}}, {{cf.<key>}}…); unknown tags render empty.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "entityType": {
+          "type": "string",
+          "enum": [
+            "contact",
+            "company",
+            "deal"
+          ],
+          "description": "Omit for all."
+        },
+        "mergeTags": {
+          "type": "boolean",
+          "description": "List merge tags instead."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List custom fields",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "custom_fields_manage",
+    "title": "Manage custom fields",
+    "description": "Custom fields on contacts, companies or deals. create (field_key becomes {{cf.<key>}}), update, delete (its values go too; confirm first), set_value (one record's value).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete",
+            "set_value"
+          ]
+        },
+        "entityType": {
+          "type": "string",
+          "enum": [
+            "contact",
+            "company",
+            "deal"
+          ],
+          "description": "Required for: create, set_value."
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update. Label, e.g. \"Loan amount\"."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text",
+            "number",
+            "date",
+            "select"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Used by: create, update. Required for type select."
+        },
+        "fieldKey": {
+          "type": "string",
+          "description": "Required for: set_value; optional for: create. snake_case, max 60 chars."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "position": {
+          "type": "integer",
+          "description": "Lower sorts first."
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage custom fields",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "sms_send",
+    "title": "Send a text",
+    "description": "Send a text now, or later with `scheduledAt`. Sends a real message, billed per segment on the user's own Twilio account; confirm with the user first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "toPhone": {
+          "type": "string",
+          "description": "Recipient, E.164 (+1...)."
+        },
+        "body": {
+          "type": "string"
+        },
+        "scheduledAt": {
+          "type": "string",
+          "description": "Future ISO 8601 time. Omit to send now."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Links the message to this contact's thread."
+        },
+        "fromNumber": {
+          "type": "string",
+          "description": "Sending number, E.164. Defaults to the primary."
+        }
+      },
+      "required": [
+        "toPhone",
+        "body"
+      ]
+    },
+    "annotations": {
+      "title": "Send a text",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "sms_list",
+    "title": "List texts",
+    "description": "Read the text conversation with a `phone` or `contactId` (oldest first, both directions; `matched: false` if none), or pass `scheduled: true` to list texts queued to send.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "The other party's number, any format."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Or the contact (their primary number is used)."
+        },
+        "scheduled": {
+          "type": "boolean",
+          "description": "List pending scheduled texts instead."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "Conversation only. Default 50."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List texts",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "sms_manage",
+    "title": "Manage texts",
+    "description": "cancel_scheduled (a queued text, by id from sms_list scheduled), delete_thread (a whole conversation by phone or contactId; nothing is sent; confirm first).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "cancel_scheduled",
+            "delete_thread"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "contactId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage texts",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "suppressions_manage",
+    "title": "Manage email suppressions",
+    "description": "Who must not be messaged. channel email (unsubscribed / bounced addresses) or sms (numbers that texted STOP); action list, add (emails[] / phones[]) or remove (re-consents one; only with their permission). Confirm adds and removes with the user.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "channel": {
+          "type": "string",
+          "enum": [
+            "email",
+            "sms"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "add",
+            "remove"
+          ]
+        },
+        "email": {
+          "type": "string"
+        },
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5000,
+          "description": "For add: up to 5000."
+        },
+        "search": {
+          "type": "string",
+          "description": "For list: matches the address or contact name."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "For list. Default 100."
+        },
+        "phones": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "description": "For 'add': up to 500 numbers, any format."
+        },
+        "phone": {
+          "type": "string",
+          "description": "For 'remove', or a single 'add'."
+        },
+        "source": {
+          "type": "string",
+          "description": "Label for 'add'. Default 'imported'; 'stop_keyword' is reserved."
+        }
+      },
+      "required": [
+        "channel",
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage email suppressions",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "email_send",
+    "title": "Send an email",
+    "description": "Send a real email from the user's connected mailbox (default: the oldest one). Give bodyHtml and/or bodyText. Pass contactId so merge tags resolve and the email threads to that contact. At most 50 recipients (to+cc+bcc); a list is a campaign. One-to-one mail ignores the campaign suppression list. Confirm with the user first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "Address or comma-separated list."
+        },
+        "subject": {
+          "type": "string"
+        },
+        "bodyHtml": {
+          "type": "string"
+        },
+        "bodyText": {
+          "type": "string"
+        },
+        "cc": {
+          "type": "string"
+        },
+        "bcc": {
+          "type": "string"
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Sending mailbox, from email_accounts_list."
+        },
+        "fromEmail": {
+          "type": "string",
+          "description": "Send-as alias registered on that mailbox; others are refused (INVALID_FROM)."
+        },
+        "fromName": {
+          "type": "string"
+        },
+        "trackOpens": {
+          "type": "boolean",
+          "description": "Adds an open-tracking pixel (approximate)."
+        },
+        "scheduledSendAt": {
+          "type": "string",
+          "description": "Future ISO 8601 time to send at."
+        }
+      },
+      "required": [
+        "to",
+        "subject"
+      ]
+    },
+    "annotations": {
+      "title": "Send an email",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "email_read",
+    "title": "Read email",
+    "description": "Read email. threads (the inbox list, filter by folder / search / account), thread (threadKey: its messages; messageId: one full body), accounts (the mailboxes and send-as addresses email_send can use). Reading does not mark anything read.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "threads",
+            "thread",
+            "accounts"
+          ]
+        },
+        "search": {
+          "type": "string",
+          "description": "Matches subject, sender and message text."
+        },
+        "folder": {
+          "type": "string",
+          "enum": [
+            "inbox",
+            "sent",
+            "archive",
+            "trash",
+            "drafts"
+          ],
+          "description": "Default: all."
+        },
+        "account": {
+          "type": "string",
+          "description": "Mailbox id from email_accounts_list. Default: all."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Default 25, max 100."
+        },
+        "before": {
+          "type": "string",
+          "description": "For older conversations: the `next_before` from the previous answer."
+        },
+        "threadKey": {
+          "type": "string",
+          "description": "The `thread_id` from email_list_threads."
+        },
+        "messageId": {
+          "type": "string",
+          "description": "Fetches that message's body (slower; only when the snippet is not enough)."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Read email",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "email_thread_update",
+    "title": "Update an email thread",
+    "description": "Mark an email conversation read or unread, or move it to inbox, sent or archive.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "threadKey": {
+          "type": "string",
+          "description": "The `thread_id` from the thread list."
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "mark: true = read, false = unread."
+        },
+        "folder": {
+          "type": "string",
+          "enum": [
+            "inbox",
+            "sent",
+            "archive"
+          ],
+          "description": "move: where it goes (\"inbox\" also un-archives)."
+        }
+      },
+      "required": [
+        "threadKey"
+      ]
+    },
+    "annotations": {
+      "title": "Update an email thread",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "calls_list",
+    "title": "List calls",
+    "description": "List call history (direction, duration, voicemail transcripts), or pass `id` to fetch one call with its recording details.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Call id. Returns that one call."
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "voicemailOnly": {
+          "type": "boolean",
+          "description": "Only calls that left a voicemail."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Default 100. A full page may mean more."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List calls",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "phone_status",
+    "title": "Phone status",
+    "description": "The user's phone numbers (id, number, label, which is the default for texts and calls) and their Twilio balance as Twilio reports it (quote it; do not judge it).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "title": "Phone status",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "dashboard_summary",
+    "title": "Dashboard summary",
+    "description": "KPI summary: contact count, open and won deals with totals, messages sent/received, plus a 30-day series. pipeline: true for open deals per stage (count and value).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pipeline": {
+          "type": "boolean",
+          "description": "Per-stage open deals instead."
+        }
+      }
+    },
+    "annotations": {
+      "title": "Dashboard summary",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "activity_list",
+    "title": "List activity",
+    "description": "Recent activity, newest first: texts, calls, emails, notes, deal stage changes, task completions. Optionally scoped to one contact, company or deal.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "dealId": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "Default 50. A full page may mean more."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "For the next page."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List activity",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "saved_views_list",
+    "title": "List saved views",
+    "description": "List saved views (named filters over contacts, companies, deals or tasks).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "entityType": {
+          "type": "string",
+          "enum": [
+            "contact",
+            "company",
+            "deal",
+            "task"
+          ],
+          "description": "Only views for this record type."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List saved views",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "saved_views_manage",
+    "title": "Manage saved views",
+    "description": "Saved views (named filters). create (copy filterJson's shape from saved_views_list), update (rename or change the filter), delete (the records stay).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "entityType": {
+          "type": "string",
+          "enum": [
+            "contact",
+            "company",
+            "deal",
+            "task"
+          ]
+        },
+        "filterJson": {
+          "type": "string",
+          "description": "Used by: create, update. JSON-encoded filter."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage saved views",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "meeting_types_list",
+    "title": "List meeting types",
+    "description": "List booking meeting types (the public links people book through): name, slug, duration, availability, questions. Also says whether Google Calendar is connected, since its busy times are kept free.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "title": "List meeting types",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "meeting_types_manage",
+    "title": "Manage meeting types",
+    "description": "Booking meeting types (the public links). create (name, slug, and any of the fields update takes), update (changing slug breaks links already shared), delete (the link stops working; bookings stay; confirm first).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "slug": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "durationMin": {
+          "type": "number",
+          "description": "Used by: create, update. Minutes. Default 30."
+        },
+        "bufferMin": {
+          "type": "number",
+          "description": "Used by: create, update. Minutes kept free after each booking."
+        },
+        "description": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "minNoticeHours": {
+          "type": "number",
+          "description": "Used by: create, update."
+        },
+        "maxAdvanceDays": {
+          "type": "number",
+          "description": "Used by: create, update."
+        },
+        "locationType": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "location": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "availability": {
+          "type": "object",
+          "description": "Used by: create, update."
+        },
+        "intakeQuestions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Used by: create, update."
+        },
+        "reminderSmsHours": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Used by: create, update."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "false hides it from booking."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage meeting types",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "meetings_book",
+    "title": "Book a meeting",
+    "description": "Book a contact into a meeting type. slots: open times (from/to YYYY-MM-DD optional). book: startAt (ISO) + contactId, or name with email/phone. Prefer an open slot; if the user asks, any future time works, outside hours or notice. Emails them a confirmation (texts if set up); confirm with the user first. A clash returns booked:false + conflicts; retry with allowOverlap only if the user agrees.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "slots",
+            "book"
+          ]
+        },
+        "meetingTypeId": {
+          "type": "string",
+          "description": "From meeting_types_list."
+        },
+        "from": {
+          "type": "string",
+          "description": "slots: first date, YYYY-MM-DD in the meeting type's timezone."
+        },
+        "to": {
+          "type": "string",
+          "description": "slots: last date, inclusive."
+        },
+        "startAt": {
+          "type": "string",
+          "description": "book: ISO 8601, any future time."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "book: the contact. Their email/phone are used."
+        },
+        "name": {
+          "type": "string",
+          "description": "book, no contactId: who. Same-name contacts come back to ask about."
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "allowOverlap": {
+          "type": "boolean",
+          "description": "book: over something already on the calendar."
+        },
+        "newContact": {
+          "type": "boolean",
+          "description": "book: not that contact."
+        }
+      },
+      "required": [
+        "action",
+        "meetingTypeId"
+      ]
+    },
+    "annotations": {
+      "title": "Book a meeting",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "workflows_list",
+    "title": "List workflows",
+    "description": "List workflows, plus `quiet_hours` (sends wait for them; null = any time) and `daily_limits` (and today's count; over it waits for midnight). `id` for one definition; `id` + `runs: true` for its run history (newest first, per-step results).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Workflow id."
+        },
+        "runs": {
+          "type": "boolean",
+          "description": "With id: return run history instead."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Runs to return. Default 20."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List workflows",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "workflows_manage",
+    "title": "Manage workflows",
+    "description": "Automations. create (a trigger and steps; active by default and then acts by itself, so confirm), update (isActive false pauses), delete (confirm first).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Required for: create; optional for: update."
+        },
+        "description": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Used by: create, update. Default true."
+        },
+        "triggerType": {
+          "type": "string",
+          "enum": [
+            "entity_event",
+            "scheduled",
+            "inbound_webhook",
+            "manual"
+          ],
+          "description": "Required for: create; optional for: update."
+        },
+        "triggerEvent": {
+          "type": "string",
+          "description": "Used by: create, update. Event name, or inbound webhook id."
+        },
+        "triggerConfig": {
+          "type": "object",
+          "description": "Used by: create, update. Scheduled only: { recurrence: one_time|hourly|daily|weekly, run_at?, time_of_day?, days_of_week?, minute_of_hour?, timezone?, audience?: { tags: [1-5 names] } }. With audience it runs once per contact carrying any tag (max 500); without, once with no contact."
+        },
+        "condition": {
+          "type": "object",
+          "description": "Used by: create, update. Run is skipped unless true. { all|any: [{ field, op, value }] }. Fields: entity.<column>, cf.<field_key>, trigger.event|entity_type|entity_id, trigger.payload.<key> (not payload.<key>). Ops: equals, not_equals, contains, not_contains, starts_with, ends_with, is_set, is_not_empty, is_empty, includes_tag, greater_than, greater_or_equal, less_than, less_or_equal, older_than_days, newer_than_days. last_contacted_at older_than_days includes never-contacted contacts."
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Required for: create; optional for: update. Ordered steps, each { id?, type, config: {...} }. Types and config: send_sms { to?, body }; send_email { to?, subject, body_html?, body_text? } (blank to = the run's contact); add_to_campaign { campaign_id } (ongoing, sending); apply_tag / remove_tag { tag_name }; create_note { body }; create_task { title, description?, due_at?, due_in_days?, kind?, location?, contact_id? }; fire_webhook { url, method?, headers?, body? }; update_field { field, value } (first_name, last_name, email, phone, position, city, source, notes, primary_phone, company_id); set_custom_field { field_key, value } (\"cf.\" prefix optional); move_deal_stage { stage_id, deal_id? }, set_deal_value { value, deal_id? } (default: the run's deal); create_deal { title, value?, stage_id? } → deal_id; set_status { status } (name; \"none\" clears);delay { delay_seconds | until_time HH:MM | until_date + until_offset_days?, stop_if?: {reply?, meeting?, optout?} } (account tz; stop_if: stop if they did it meanwhile); branch { condition, then: [steps], else: [steps] }. Record steps also take entity_type/entity_id. Strings support {{first_name}}, {{trigger.event}}, {{steps.<id>.output.<key>}} (give steps an id). On 400 INVALID_WORKFLOW, fix what it lists; do not retry as is."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage workflows",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "workflows_run_now",
+    "title": "Run a workflow now",
+    "description": "Run a workflow now on one existing record, bypassing its trigger. Its steps really execute (texts, emails, webhooks), so confirm with the user.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "entityType": {
+          "type": "string",
+          "enum": [
+            "contact",
+            "company",
+            "deal",
+            "task",
+            "note"
+          ]
+        },
+        "entityId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "entityType",
+        "entityId"
+      ]
+    },
+    "annotations": {
+      "title": "Run a workflow now",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "inbound_webhooks_manage",
+    "title": "Manage inbound webhooks",
+    "description": "Inbound webhooks: URLs other services POST to so Groundbase creates contacts, deals, tasks etc. action list | get | create | update | delete. create returns the full URL with its token ONCE (tell the user; it cannot be shown again). delete stops the URL accepting posts immediately; confirm first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "get",
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "For get/update/delete."
+        },
+        "name": {
+          "type": "string",
+          "description": "Required on create."
+        },
+        "description": {
+          "type": "string"
+        },
+        "mappingMode": {
+          "type": "string",
+          "enum": [
+            "native",
+            "mapped"
+          ],
+          "description": "Default native."
+        },
+        "mappingJson": {
+          "type": "object",
+          "description": "For mappingMode \"mapped\": { \"actions\": [{ \"event\": \"contact.find_or_create\" (or another native event), \"fields\": { \"<groundbase_field>\": \"<path.in.payload>\" }, \"static\": { \"<groundbase_field>\": <literal> } }] }. Paths are dotted with optional indices (\"lead.contact[0].email\"); missing paths are omitted."
+        },
+        "signingSecret": {
+          "type": "string",
+          "description": "Optional HMAC secret (create only); senders send X-Groundbase-Signature."
+        },
+        "ipAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CIDRs. Empty = any IP."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Update only; false pauses receiving."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage inbound webhooks",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "outbound_webhooks_manage",
+    "title": "Manage outbound webhooks",
+    "description": "Outbound webhooks: Groundbase POSTs to a URL when subscribed events fire. action list | get | create | update | delete. create needs name, url, events and returns the signing secret ONCE (tell the user). create, or a new url, sends CRM data (names, emails, phones) there and emails the owner: confirm the url with the user first. delete stops deliveries and abandons retries; confirm first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "get",
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "For get/update/delete."
+        },
+        "name": {
+          "type": "string",
+          "description": "Required on create."
+        },
+        "url": {
+          "type": "string",
+          "description": "Public http(s) URL (use https: the payload is CRM data). Required on create."
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Event names, or [\"*\"] for all: contact|company.created/updated/deleted, contact.status_changed, deal.created/updated/deleted/stage_changed/won/lost, task.created/updated/completed/deleted, note.created, tag.applied/removed, sms.sent/received/delivered/failed, call.completed, voicemail.received, email.sent/received, invoice.issued/paid/voided, payment.recorded, quote.issued/accepted/declined, form.submitted, meeting.booked/rescheduled/cancelled. Slack and Discord webhook URLs get a readable message; others get signed JSON."
+        },
+        "description": {
+          "type": "string"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Update only; false pauses delivery."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage outbound webhooks",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "forms_manage",
+    "title": "Manage forms",
+    "description": "Lead-capture forms with a public link; each submission creates or updates a contact. action: list | templates | get (id) | create (name?, templateId?) | update (id + changes) | delete (id; the link stops working; confirm) | submissions (id; latest 200).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "templates",
+            "get",
+            "create",
+            "update",
+            "delete",
+            "submissions"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "Form id."
+        },
+        "name": {
+          "type": "string"
+        },
+        "templateId": {
+          "type": "string",
+          "description": "From action templates."
+        },
+        "title": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "[{ key, label, type: text|email|phone|textarea|select|address|date|checkbox|hidden|section, required?, options? (select), default? (hidden), text? (section) }]. Keys name, first_name, last_name, email, phone fill the contact. hidden = ?<key>= on the link. Replaces the list."
+        },
+        "submitLabel": {
+          "type": "string"
+        },
+        "successMessage": {
+          "type": "string"
+        },
+        "redirectUrl": {
+          "type": "string",
+          "description": "After submit, go here (\"\" = successMessage)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tag names put on each new lead (max 10). Replaces the list."
+        },
+        "createTask": {
+          "type": "boolean",
+          "description": "Also make a follow-up task per submission."
+        },
+        "style": {
+          "type": "object",
+          "description": "Colours \"#rrggbb\". {} = default look. Replaces the style.",
+          "properties": {
+            "button_color": {
+              "type": "string"
+            },
+            "background_color": {
+              "type": "string"
+            },
+            "text_color": {
+              "type": "string"
+            },
+            "font": {
+              "type": "string",
+              "enum": [
+                "system",
+                "serif",
+                "rounded",
+                "mono"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage forms",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "documents_manage",
+    "title": "Manage documents",
+    "description": "Documents sent for signing. list (status/contactId), get (id: signers + history), templates (saved forms and their signer roles), send (a template; emails each signer, confirm first), remind (email whoever is due to sign; confirm first), void (cancel a waiting one for good). Statuses: sent = waiting, completed = signed by all, declined, voided.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "get",
+            "templates",
+            "send",
+            "remind",
+            "void"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "get / remind / void: the document id."
+        },
+        "status": {
+          "type": "string",
+          "description": "list: sent | completed | declined | voided"
+        },
+        "contactId": {
+          "type": "string",
+          "description": "list: documents this contact was sent. send: who signs (one signer role)."
+        },
+        "templateId": {
+          "type": "string",
+          "description": "send: the template. With one signer role pass contactId; with several pass signers. A role marked is_sender is the user and fills itself. Contacts need an email."
+        },
+        "signers": {
+          "type": "array",
+          "description": "send, several roles: { role, contactId } or { role, name, email }.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "contactId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          }
+        },
+        "title": {
+          "type": "string",
+          "description": "send: defaults to the template name."
+        },
+        "message": {
+          "type": "string",
+          "description": "send: shown in the email; defaults to the template's."
+        },
+        "ordered": {
+          "type": "boolean",
+          "description": "send: sign one after another in role order (the user last)."
+        },
+        "signerId": {
+          "type": "string",
+          "description": "remind: just this signer."
+        },
+        "reason": {
+          "type": "string",
+          "description": "void: why (kept in the history)."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage documents",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "voicemail_drops_list",
+    "title": "List voicemail drops",
+    "description": "List voicemail drops: name, has_audio (only drops with audio can be dropped), duration_ms, source, script_text.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "title": "List voicemail drops",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "voicemail_drops_manage",
+    "title": "Manage voicemail drops",
+    "description": "Voicemail drops. create (name; the user records the audio by phone in the app), update (rename), delete (confirm first). On admin accounts only, `script` makes the audio in Emma's voice, billed per character: confirm the script.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Used by: create, update. Default \"Untitled drop\"."
+        },
+        "script": {
+          "type": "string",
+          "description": "Used by: create, update. Up to 2000 chars (~2 min). Inline tags like [warm], [chuckles] work."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage voicemail drops",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "voicemail_drops_drop",
+    "title": "Drop a voicemail",
+    "description": "Play a drop onto someone's voicemail via a real Twilio call (hangs up if a person answers), billed at Twilio voice rates on the user's account. Any country (with its code). Give contactId or toPhone. Confirm with the user first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dropId": {
+          "type": "string",
+          "description": "A drop with has_audio."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Uses the contact's primary phone."
+        },
+        "toPhone": {
+          "type": "string",
+          "description": "E.164, when there is no contact."
+        },
+        "fromNumberId": {
+          "type": "string",
+          "description": "Twilio number id. Default: first active number."
+        }
+      },
+      "required": [
+        "dropId"
+      ]
+    },
+    "annotations": {
+      "title": "Drop a voicemail",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "campaigns_manage",
+    "title": "Manage campaigns",
+    "description": "Email/SMS campaigns and newsletters. Actions: list (kind=newsletter for newsletters), get, create (draft; template_id starts a newsletter from newsletter_templates), update, delete, duplicate, test_send, send_now, schedule, pause, resume, stop, add_recipients, preview_audience, newsletter_templates. send_now/schedule/resume message real people: confirm first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "get",
+            "create",
+            "update",
+            "delete",
+            "duplicate",
+            "test_send",
+            "send_now",
+            "schedule",
+            "pause",
+            "resume",
+            "stop",
+            "add_recipients",
+            "preview_audience",
+            "newsletter_templates"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "Campaign id; needed for all but list, create, preview_audience."
+        },
+        "name": {
+          "type": "string"
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "email",
+            "sms"
+          ]
+        },
+        "send_mode": {
+          "type": "string",
+          "enum": [
+            "now",
+            "scheduled",
+            "drip"
+          ]
+        },
+        "enrolment_mode": {
+          "type": "string",
+          "enum": [
+            "once",
+            "ongoing"
+          ],
+          "description": "'once' (default) fixes its audience at start. 'ongoing' keeps sending until stop and takes new entrants (re-checked every 5 min)."
+        },
+        "status": {
+          "type": "string",
+          "description": "list filter."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "newsletter",
+            "campaign"
+          ],
+          "description": "list filter: newsletters, or everything else."
+        },
+        "template_id": {
+          "type": "string",
+          "description": "create: start a newsletter from this template (newsletter_templates). name defaults to the template name."
+        },
+        "role": {
+          "type": "string",
+          "description": "newsletter_templates: another industry's set (e.g. real estate, mortgage, insurance). Default: the user's own."
+        },
+        "q": {
+          "type": "string",
+          "description": "list: name search."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "audience_filter": {
+          "type": "object",
+          "description": "{ all: [rules], any?: [rules], include_contacts?: [ids] }. all ANDs, any ORs. Rules: {type:\"all_contacts\"}; {type:\"tag\",op:\"has\"|\"has_not\",value:name}; {type:\"behavior\",event:\"campaign_sent\"|\"campaign_opened\"|\"campaign_clicked\"|\"campaign_replied\"|\"campaign_bounced\",campaign_id,within_days?,inverse?}; {type:\"custom_field\",field:key,op:\"equals\"|\"not_equals\"|\"contains\"|\"gt\"|\"lt\",value}; {type:\"last_contacted\",op:\"gt\"|\"lt\",days}; {type:\"status\",op?:\"is_not\",value:[names|\"none\"]}. include_contacts alone = exactly those people."
+        },
+        "content": {
+          "type": "object",
+          "description": "Single send. Email: { subject, preheader?, from_name?, from_email?, reply_to?, blocks: [{ type, props }] }; block types text {html}, header {html, level 1-3}, image {src, alt, width}, button {text, url, bgColor?}, divider {color?}, spacer {height}. from_email: a domain verified in Resend (resend_manage domains). reply_to: a mailbox connected in Groundbase, so drip reply-exit sees replies. SMS: { body, media_urls? }. Merge tags like {{first_name}}, {{cf.<key>}} work in any string. Newsletter: content.kind 'newsletter' (one email, sent once). Extra blocks: section_header {title}; agent_card {photoUrl, name, title, phone, email, website, brokerage, note}; listing_card {imageUrl, status, price, address, beds, baths, sqft, url, buttonText}; market_stats {title, stats:[{label,value,change}], footnote}; quote {quote, author, role, avatarUrl}; footer {businessName, businessAddress, tagline, unsubText}. Refused until the footer has a business name and mailing address and no [bracketed] or $— placeholder is left; the refusal names the first."
+        },
+        "steps": {
+          "type": "array",
+          "description": "Drip steps (send_mode 'drip'): [{ delay_seconds, content_json, exit_on?, channel? }]. Step 0 sends at start; each later step sends delay_seconds after that recipient's previous actual send. exit_on { reply?, open?, click?, meeting?, status? } skips the rest for a contact who did that. channel overrides the campaign channel for the step.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "delay_seconds": {
+                "type": "integer"
+              },
+              "content_json": {
+                "type": "object",
+                "description": "Same shape as content."
+              },
+              "content": {
+                "type": "object",
+                "description": "Alias of content_json."
+              },
+              "exit_on": {
+                "type": "object",
+                "properties": {
+                  "reply": {
+                    "type": "boolean"
+                  },
+                  "open": {
+                    "type": "boolean"
+                  },
+                  "click": {
+                    "type": "boolean"
+                  },
+                  "meeting": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "channel": {
+                "type": "string",
+                "enum": [
+                  "email",
+                  "sms"
+                ]
+              }
+            },
+            "required": []
+          }
+        },
+        "sending_window": {
+          "type": "object",
+          "description": "{ days: [0-6, 0=Sunday], start_hour: 0-23, end_hour: 1-24 (exclusive), timezone?: IANA or 'auto' (account tz) }. Sends due outside the window wait for the next open hour. null = no restriction."
+        },
+        "to": {
+          "type": "string",
+          "description": "test_send recipient."
+        },
+        "scheduled_at": {
+          "type": "integer",
+          "description": "Unix seconds."
+        },
+        "contact_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "description": "add_recipients: up to 500."
+        },
+        "audience": {
+          "type": "string",
+          "enum": [
+            "non_openers"
+          ],
+          "description": "duplicate: copy goes only to people the (sent, email) campaign reached who did not open it."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage campaigns",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "campaigns_analytics",
+    "title": "Campaign analytics",
+    "description": "Stats for one campaign (recipients, sent, delivered, unique opens/clicks, bounces, unsubscribes, replies, failures). With `recipients: true`, returns per-recipient rows instead, optionally filtered by `status`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "recipients": {
+          "type": "boolean",
+          "description": "Return per-recipient status rows."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "sent",
+            "delivered",
+            "opened",
+            "clicked",
+            "bounced",
+            "unsubscribed",
+            "replied",
+            "failed"
+          ],
+          "description": "Recipients filter."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Recipients: default 100."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "annotations": {
+      "title": "Campaign analytics",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "resend_manage",
+    "title": "Resend connection",
+    "description": "The BYO Resend connection for email campaigns, read-only. Actions: status; domains (verification state; check before choosing from_email). Connecting, disconnecting, test sends and turning on tracking are done in the app (Settings > Email).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "status",
+            "domains"
+          ]
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Resend connection",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "sending_settings",
+    "title": "Sending settings",
+    "description": "Daily cap on campaign EMAILS (not SMS) per day in the account timezone. get: cap, sent_today, remaining_today, domain_caps. set: daily_email_send_cap (null = none, 0 = stop today), account-wide or, with `domain`, for one domain inside it. Over-cap recipients wait for later days. Use to warm a new domain (~20/day).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "get",
+            "set"
+          ]
+        },
+        "daily_email_send_cap": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "set: non-negative integer or null."
+        },
+        "domain": {
+          "type": "string",
+          "description": "set: bare hostname, e.g. 'example.com'. Omit for the account-wide cap."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Sending settings",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "invoices_list",
+    "title": "List invoices",
+    "description": "List invoices (filter by customer, status, text; outstanding totals per currency), or `id` for one with lines, charges and amount paid. With id: payments (ledger), creditNotes, or recurring. report: aging | revenue | tax, from/to YYYY-MM-DD.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "One invoice."
+        },
+        "payments": {
+          "type": "boolean",
+          "description": "With id: its payment ledger."
+        },
+        "creditNotes": {
+          "type": "boolean",
+          "description": "With id: its credit notes."
+        },
+        "recurring": {
+          "type": "boolean",
+          "description": "With id: its repeat schedule."
+        },
+        "report": {
+          "type": "string",
+          "enum": [
+            "aging",
+            "revenue",
+            "tax"
+          ]
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "draft | issued | partially_paid | paid | void"
+        },
+        "outstanding": {
+          "type": "boolean",
+          "description": "Only invoices with money still owed."
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string",
+          "description": "Matches number and customer."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Default 100."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List invoices",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "invoices_manage",
+    "title": "Manage invoices",
+    "description": "Invoices. save_draft (create, or edit by id), issue (numbers it; final), send (emails it; confirm), void, public_link (a pay link; revoke), credit_note (amount + reason; final), send_credit_note / void_credit_note (creditNoteId), recurring (frequency + nextRunDate, autoSend emails each; stop). Confirm anything final or sent.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "save_draft",
+            "issue",
+            "send",
+            "void",
+            "public_link",
+            "credit_note",
+            "send_credit_note",
+            "void_credit_note",
+            "recurring"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: issue, send, void, public_link, credit_note, recurring; optional for: save_draft. Edit this draft."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Create: one of contactId/companyId."
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217. Defaults from the billing profile."
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "YYYY-MM-DD. Default today."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "YYYY-MM-DD. Default from profile terms."
+        },
+        "notes": {
+          "type": "string"
+        },
+        "terms": {
+          "type": "string"
+        },
+        "lines": {
+          "type": "array",
+          "description": "itemId (saved item) or name + unitPrice. Decimal strings. taxIds: which of the taxes apply (default all).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "string"
+              },
+              "unitPrice": {
+                "type": "string",
+                "description": "Overrides the item price."
+              },
+              "discountPercent": {
+                "type": "string",
+                "description": "e.g. \"10\", before tax."
+              },
+              "discountAmount": {
+                "type": "string",
+                "description": "Flat discount instead."
+              },
+              "taxIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "taxRate": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "charges": {
+          "type": "array",
+          "description": "Below the subtotal (shipping); negative for a discount or deposit.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "taxRate": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "taxes": {
+          "type": "array",
+          "description": "[{id?,name,rate}], e.g. GST 5 + QST 9.975 (ids t1,t2…).",
+          "items": {
+            "type": "object"
+          }
+        },
+        "to": {
+          "type": "string",
+          "description": "Default: profile billing email, then the contact's email."
+        },
+        "sendVia": {
+          "type": "string",
+          "enum": [
+            "smtp",
+            "resend",
+            "groundbase"
+          ],
+          "description": "Default: their own mailbox, then Resend, then Groundbase's address."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Default: the invoice settings subject."
+        },
+        "message": {
+          "type": "string",
+          "description": "A note above the invoice in the email."
+        },
+        "confirm_paid": {
+          "type": "boolean",
+          "description": "Void even though payments or credit notes are recorded on it. Only after the user has confirmed. Default false."
+        },
+        "revoke": {
+          "type": "boolean",
+          "description": "public_link: turn the link off."
+        },
+        "amount": {
+          "type": "string",
+          "description": "credit_note: before tax, e.g. \"50.00\"."
+        },
+        "taxRate": {
+          "type": "string",
+          "description": "credit_note: percent, e.g. \"13\"."
+        },
+        "reason": {
+          "type": "string",
+          "description": "credit_note: printed on it."
+        },
+        "creditNoteId": {
+          "type": "string",
+          "description": "Required for: send_credit_note, void_credit_note."
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "weekly",
+            "monthly",
+            "quarterly",
+            "yearly"
+          ]
+        },
+        "nextRunDate": {
+          "type": "string",
+          "description": "recurring: YYYY-MM-DD, today or later."
+        },
+        "endDate": {
+          "type": "string",
+          "description": "recurring: YYYY-MM-DD, or omit for no end."
+        },
+        "autoSend": {
+          "type": "boolean",
+          "description": "recurring: email each copy to the customer. Confirm with the user."
+        },
+        "stop": {
+          "type": "boolean",
+          "description": "recurring: end the schedule."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage invoices",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "invoice_payments_manage",
+    "title": "Manage invoice payments",
+    "description": "record (a payment taken outside Stripe; emails a receipt, confirm first) or reverse (paymentId; undoes a recorded payment). Card refunds are done in the app.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "record",
+            "reverse"
+          ]
+        },
+        "invoiceId": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "description": "Decimal string in the invoice currency."
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "bank_transfer",
+            "card",
+            "cash",
+            "cheque",
+            "other"
+          ]
+        },
+        "reference": {
+          "type": "string",
+          "description": "Cheque number or transfer reference."
+        },
+        "receivedAt": {
+          "type": "string",
+          "description": "ISO date. Default now."
+        },
+        "notes": {
+          "type": "string"
+        },
+        "sendReceipt": {
+          "type": "boolean",
+          "description": "Default true."
+        },
+        "sendVia": {
+          "type": "string",
+          "enum": [
+            "smtp",
+            "resend",
+            "groundbase"
+          ],
+          "description": "How the receipt is sent. Default: their own mailbox, then Resend, then Groundbase's address."
+        },
+        "paymentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage invoice payments",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "invoice_items_manage",
+    "title": "Manage invoice items",
+    "description": "Saved invoice items (services / products). list (with price per currency), save (create, or edit by id; prices are decimal strings), delete (invoices keep their lines).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "save",
+            "delete"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: delete; optional for: save. Edit this item."
+        },
+        "name": {
+          "type": "string",
+          "description": "Required to create."
+        },
+        "description": {
+          "type": "string"
+        },
+        "baseCurrency": {
+          "type": "string",
+          "description": "Create only. ISO 4217, default USD."
+        },
+        "unitPrice": {
+          "type": "string",
+          "description": "In base currency, with its decimal places (\"200.00\"; JPY \"15000\")."
+        },
+        "unitLabel": {
+          "type": "string",
+          "description": "e.g. \"hour\"."
+        },
+        "defaultTaxRate": {
+          "type": "string",
+          "description": "Percent, e.g. \"17.5\"."
+        },
+        "prices": {
+          "type": "object",
+          "description": "Chosen prices per currency, e.g. { \"CAD\": \"150.00\" }; others convert from base."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage invoice items",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "billing_profiles_manage",
+    "title": "Manage billing profiles",
+    "description": "Billing details on a contact or company (currency, terms, billing email, tax id). list (or contactId / companyId for one), save (create on exactly one, or edit by id), delete.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "list",
+            "save",
+            "delete"
+          ]
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Used by: list, save."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Used by: list, save."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: delete; optional for: save. Edit this profile."
+        },
+        "billingEmail": {
+          "type": "string",
+          "description": "Where invoices and receipts go, if not the contact's own address."
+        },
+        "billingAddress": {
+          "type": "string"
+        },
+        "taxId": {
+          "type": "string"
+        },
+        "taxExempt": {
+          "type": "boolean"
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217."
+        },
+        "paymentTermsDays": {
+          "type": "number",
+          "description": "0 = due on receipt."
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage billing profiles",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "invoice_settings",
+    "title": "Invoice settings",
+    "description": "Invoice settings: business details on invoices and receipts, payment instructions, numbering. get, or set (omitted fields unchanged; nextNumber only moves forward).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "get",
+            "set"
+          ]
+        },
+        "businessName": {
+          "type": "string"
+        },
+        "businessEmail": {
+          "type": "string"
+        },
+        "businessPhone": {
+          "type": "string"
+        },
+        "businessAddress": {
+          "type": "string"
+        },
+        "businessTaxId": {
+          "type": "string"
+        },
+        "paymentInstructions": {
+          "type": "string",
+          "description": "How to pay (bank details, link)."
+        },
+        "defaultCurrency": {
+          "type": "string"
+        },
+        "defaultTermsDays": {
+          "type": "number"
+        },
+        "defaultNotes": {
+          "type": "string"
+        },
+        "defaultTermsText": {
+          "type": "string"
+        },
+        "numberPrefix": {
+          "type": "string",
+          "description": "e.g. \"INV-\", max 16 chars."
+        },
+        "numberPadding": {
+          "type": "number",
+          "description": "Min digits 1-12."
+        },
+        "nextNumber": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Invoice settings",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "quotes_list",
+    "title": "List quotes",
+    "description": "List quotes with counts per status and open value per currency, or pass `id` for one quote with lines, totals, deposit and acceptance details.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Quote id. Returns that one quote."
+        },
+        "status": {
+          "type": "string",
+          "description": "draft | open | accepted | declined | void | expired (open but past valid-until)"
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Default 100."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "annotations": {
+      "title": "List quotes",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "quotes_manage",
+    "title": "Manage quotes",
+    "description": "Quotes. save_draft (create, or edit by id), issue (numbers it), send (emails it with an accept link; confirm), record_outcome (accepted / declined after a conversation), convert (accepted → draft invoice), void, public_link (the accept link; revoke).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "save_draft",
+            "issue",
+            "send",
+            "record_outcome",
+            "convert",
+            "void",
+            "public_link"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: issue, send, record_outcome, convert, void, public_link; optional for: save_draft. Edit this draft."
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Create: one of contactId/companyId."
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217. Defaults from the billing profile."
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "YYYY-MM-DD. Default today."
+        },
+        "validUntil": {
+          "type": "string",
+          "description": "YYYY-MM-DD. Default issue date + 30 days."
+        },
+        "depositPercent": {
+          "type": "string",
+          "description": "e.g. \"25\". Empty string removes."
+        },
+        "depositAmount": {
+          "type": "string",
+          "description": "e.g. \"500.00\". Empty string removes."
+        },
+        "notes": {
+          "type": "string"
+        },
+        "terms": {
+          "type": "string",
+          "description": "What the customer agrees to by accepting."
+        },
+        "lines": {
+          "type": "array",
+          "description": "itemId (saved item) or name + unitPrice. Decimal strings. taxIds: which of the taxes apply (default all).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "string"
+              },
+              "unitPrice": {
+                "type": "string",
+                "description": "Overrides the item price."
+              },
+              "discountPercent": {
+                "type": "string",
+                "description": "e.g. \"10\", before tax."
+              },
+              "discountAmount": {
+                "type": "string",
+                "description": "Flat discount instead."
+              },
+              "taxIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "taxRate": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "charges": {
+          "type": "array",
+          "description": "Below the subtotal (shipping); negative for a discount or deposit.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "taxRate": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "taxes": {
+          "type": "array",
+          "description": "[{id?,name,rate}], e.g. GST 5 + QST 9.975 (ids t1,t2…).",
+          "items": {
+            "type": "object"
+          }
+        },
+        "to": {
+          "type": "string",
+          "description": "Default: billing email, then the contact's email."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Tokens {number} {business} {customer} {amount} {due}."
+        },
+        "message": {
+          "type": "string",
+          "description": "Covering note; same tokens."
+        },
+        "sendVia": {
+          "type": "string",
+          "enum": [
+            "smtp",
+            "resend"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "accepted",
+            "declined"
+          ]
+        },
+        "acceptedByName": {
+          "type": "string",
+          "description": "Accepted: who said yes, e.g. \"Dana (by phone)\"."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Declined: optional reason."
+        },
+        "confirm_paid": {
+          "type": "boolean",
+          "description": "Void despite a deposit."
+        },
+        "revoke": {
+          "type": "boolean",
+          "description": "public_link: turn the link off."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage quotes",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "time_list",
+    "title": "List time entries",
+    "description": "List time entries (newest first) plus the running timer and per-customer totals (default last 30 days). status \"unbilled\" = billable, stopped, not on a live invoice.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "contactId": {
+          "type": "string"
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "dealId": {
+          "type": "string",
+          "description": "Also fills in the deal's contact and company."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "unbilled",
+            "billed"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "description": "ISO 8601, inclusive."
+        },
+        "to": {
+          "type": "string",
+          "description": "ISO 8601, exclusive."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Default 50. A full page may mean more."
+        }
+      }
+    },
+    "annotations": {
+      "title": "List time entries",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "time_manage",
+    "title": "Manage time entries",
+    "description": "Time tracking. start (the timer, for a contact / company / deal; stops any running one), stop, log (time after the fact), update (edit an entry), delete, bill (entryIds onto a draft invoice), unbill (take one back off).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "start",
+            "stop",
+            "log",
+            "update",
+            "delete",
+            "bill",
+            "unbill"
+          ]
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Used by: start, log, update."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "Used by: start, log, update."
+        },
+        "dealId": {
+          "type": "string",
+          "description": "Used by: start, log, update. Also fills in the deal's contact and company."
+        },
+        "description": {
+          "type": "string",
+          "description": "Used by: start, log, update."
+        },
+        "billable": {
+          "type": "boolean",
+          "description": "Used by: start, log, update. Default true."
+        },
+        "rate": {
+          "type": "string",
+          "description": "Used by: start, log, update. Hourly, decimal string."
+        },
+        "currency": {
+          "type": "string",
+          "description": "Used by: start, log. Default: invoicing currency."
+        },
+        "duration": {
+          "type": "string",
+          "description": "Used by: log, update, delete."
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "Used by: log, update. ISO 8601."
+        },
+        "endedAt": {
+          "type": "string",
+          "description": "ISO 8601."
+        },
+        "id": {
+          "type": "string",
+          "description": "Required for: update, delete, unbill."
+        },
+        "delete": {
+          "type": "boolean"
+        },
+        "invoiceId": {
+          "type": "string",
+          "description": "bill: a draft invoice."
+        },
+        "entryIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 500,
+          "description": "bill: from time_list (status unbilled)."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Manage time entries",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  }
+]

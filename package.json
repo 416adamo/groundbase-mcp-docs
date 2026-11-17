@@ -1,0 +1,16 @@
+{
+  "name": "groundbase-mcp-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local (stdio) bridge to the hosted Groundbase MCP server at https://mcp.groundbasecrm.com/mcp",
+  "type": "module",
+  "bin": { "groundbase-mcp": "server.mjs" },
+  "files": ["server.mjs", "tools.json"],
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "homepage": "https://groundbasecrm.com",
+  "repository": { "type": "git", "url": "git+https://github.com/416adamo/groundbase-mcp-docs.git" }
+}

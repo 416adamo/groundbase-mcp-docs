@@ -4,7 +4,7 @@
 
 Connect Claude, Cursor, or any MCP client to [Groundbase](https://groundbasecrm.com), a $19/month CRM for solo operators.
 
-This is a **remote** MCP server. There is nothing to install and nothing to run locally. You point your client at a URL and authenticate.
+This is a **remote** MCP server. Most clients point at a URL and authenticate, with nothing to install or run. For a client that can only start a local process, this repo also holds a small local bridge to the same server: see [Run it locally](#run-it-locally-stdio).
 
 ## What makes it different
 
@@ -61,6 +61,37 @@ Authorization: Bearer gbm_your_key_here
 
 Any client that speaks Streamable HTTP works. Configuration differs by client, so check your client's documentation for adding a remote MCP server by URL.
 
+### Run it locally (stdio)
+
+Some MCP clients cannot connect to a remote server: they start a program on your computer and talk to it over stdin and stdout. For those, [`server.mjs`](server.mjs) in this repo is a local bridge. It speaks MCP on stdio and passes every tool call to the hosted server above with your API key. It has no dependencies (Node 18 or newer), stores nothing, and contacts nothing but `mcp.groundbasecrm.com`.
+
+1. Create a key in Groundbase under **Settings → AI integrations**.
+2. Clone this repo.
+3. Add it to your client's configuration:
+
+```json
+{
+  "mcpServers": {
+    "groundbase": {
+      "command": "node",
+      "args": ["/path/to/groundbase-mcp-docs/server.mjs"],
+      "env": { "GROUNDBASE_API_KEY": "gbm_your_key_here" }
+    }
+  }
+}
+```
+
+Or with Docker:
+
+```
+docker build -t groundbase-mcp .
+docker run -i --rm -e GROUNDBASE_API_KEY=gbm_your_key_here groundbase-mcp
+```
+
+With a key set, the tool list and every result come from the hosted server, so they are always current. With no key the bridge still starts and lists the tools from [`tools.json`](tools.json), a copy of what `tools/list` returns to a customer account, and every tool call answers that no key is set. That is what a directory's automated check sees; it is not a way to use Groundbase without an account.
+
+`node test.mjs` runs the bridge's own checks.
+
 ## Tools
 
 59 tools, as `tools/list` returns them to a customer account. Each area has a read tool and a `_manage` tool whose `action` says what to do; sending, booking, dropping a voicemail and running a workflow are tools of their own, so a client can tell them apart.
@@ -111,4 +142,4 @@ Questions, bugs, or a tool you wish existed: open an issue here, or email **mcp@
 
 ## Note on this repository
 
-This repo is documentation and issue tracking for a hosted service. The server source is not open source. If you are looking for the endpoint, it is at the top of this file.
+This repo is documentation and issue tracking for a hosted service, plus the local bridge described above (`server.mjs`, `tools.json`, `Dockerfile`). The hosted server's own source is not open source. If you are looking for the endpoint, it is at the top of this file.
