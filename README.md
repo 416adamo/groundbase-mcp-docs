@@ -1,7 +1,5 @@
 # Groundbase MCP Server
 
-[![smithery badge](https://smithery.ai/badge/adam-jsdb/Groundbase)](https://smithery.ai/servers/adam-jsdb/Groundbase)
-
 Connect Claude, Cursor, or any MCP client to [Groundbase](https://groundbasecrm.com), a $19/month CRM for solo operators.
 
 This is a **remote** MCP server. Most clients point at a URL and authenticate, with nothing to install or run. For a client that can only start a local process, this repo also holds a small local bridge to the same server: see [Run it locally](#run-it-locally-stdio).
@@ -35,7 +33,7 @@ Health check: [`https://mcp.groundbasecrm.com/health`](https://mcp.groundbasecrm
 
 ## Requirements
 
-An active Groundbase account. $19/month flat, 14-day trial. SMS and voice require you to connect your own Twilio account, and email requires your own Resend account, so those costs are billed to you directly by those providers with no markup from us.
+An active Groundbase account. $19/month flat (or $199/year), 14-day free trial with no card needed. SMS and voice require you to connect your own Twilio account, and email requires your own Resend account, so those costs are billed to you directly by those providers with no markup from us.
 
 ## Setup
 
