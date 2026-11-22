@@ -1785,7 +1785,7 @@
       "readOnlyHint": false,
       "destructiveHint": true,
       "idempotentHint": false,
-      "openWorldHint": false
+      "openWorldHint": true
     }
   },
   {
@@ -1999,7 +1999,7 @@
   {
     "name": "inbound_webhooks_manage",
     "title": "Manage inbound webhooks",
-    "description": "Inbound webhooks: URLs other services POST to so Groundbase creates contacts, deals, tasks etc. action list | get | create | update | delete. create returns the full URL with its token ONCE (tell the user; it cannot be shown again). delete stops the URL accepting posts immediately; confirm first.",
+    "description": "Inbound webhooks: manage the URLs other services POST to (settings only; runs nothing). action list | get | create | update | delete. create returns the full URL with its token ONCE (tell the user; it cannot be shown again). delete stops the URL accepting posts immediately; confirm first.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2034,7 +2034,7 @@
         },
         "mappingJson": {
           "type": "object",
-          "description": "For mappingMode \"mapped\": { \"actions\": [{ \"event\": \"contact.find_or_create\" (or another native event), \"fields\": { \"<groundbase_field>\": \"<path.in.payload>\" }, \"static\": { \"<groundbase_field>\": <literal> } }] }. Paths are dotted with optional indices (\"lead.contact[0].email\"); missing paths are omitted."
+          "description": "Stored rules for mappingMode \"mapped\": { \"actions\": [{ \"event\": \"contact.find_or_create\" (or another native event), \"fields\": { \"<groundbase_field>\": \"<path.in.payload>\" }, \"static\": { \"<groundbase_field>\": <literal> } }] }. Paths are dotted with optional indices (\"lead.contact[0].email\"); missing paths are omitted."
         },
         "signingSecret": {
           "type": "string",
@@ -2061,7 +2061,7 @@
       "readOnlyHint": false,
       "destructiveHint": true,
       "idempotentHint": false,
-      "openWorldHint": false
+      "openWorldHint": true
     }
   },
   {
@@ -2218,7 +2218,7 @@
       "readOnlyHint": false,
       "destructiveHint": true,
       "idempotentHint": false,
-      "openWorldHint": false
+      "openWorldHint": true
     }
   },
   {
