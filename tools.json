@@ -1185,7 +1185,7 @@
     "annotations": {
       "title": "Send a text",
       "readOnlyHint": false,
-      "destructiveHint": false,
+      "destructiveHint": true,
       "idempotentHint": false,
       "openWorldHint": true
     }
@@ -1391,7 +1391,7 @@
     "annotations": {
       "title": "Send an email",
       "readOnlyHint": false,
-      "destructiveHint": false,
+      "destructiveHint": true,
       "idempotentHint": false,
       "openWorldHint": true
     }
@@ -1849,7 +1849,7 @@
     "annotations": {
       "title": "Book a meeting",
       "readOnlyHint": false,
-      "destructiveHint": false,
+      "destructiveHint": true,
       "idempotentHint": false,
       "openWorldHint": true
     }
@@ -1991,7 +1991,7 @@
     "annotations": {
       "title": "Run a workflow now",
       "readOnlyHint": false,
-      "destructiveHint": false,
+      "destructiveHint": true,
       "idempotentHint": false,
       "openWorldHint": true
     }
@@ -2399,7 +2399,7 @@
     "annotations": {
       "title": "Drop a voicemail",
       "readOnlyHint": false,
-      "destructiveHint": false,
+      "destructiveHint": true,
       "idempotentHint": false,
       "openWorldHint": true
     }
