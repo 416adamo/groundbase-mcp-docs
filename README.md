@@ -92,7 +92,7 @@ With a key set, the tool list and every result come from the hosted server, so t
 
 ## Tools
 
-59 tools, as `tools/list` returns them to a customer account. Each area has a read tool and a `_manage` tool whose `action` says what to do; sending, booking, dropping a voicemail and running a workflow are tools of their own, so a client can tell them apart.
+60 tools, as `tools/list` returns them to a customer account. Each area has a read tool and a `_manage` tool whose `action` says what to do; sending, booking, dropping a voicemail and running a workflow are tools of their own, so a client can tell them apart.
 
 | Area | Tools |
 |---|---|
@@ -100,7 +100,7 @@ With a key set, the tool list and every result come from the hosted server, so t
 | Tasks, notes, addresses | `tasks_list`, `tasks_manage` (create, update, delete), `notes_list`, `notes_manage`, `addresses_manage` (list, create, update, delete) |
 | Tags, custom fields, saved views | `tags_list`, `tags_manage` (create, update, delete, apply), `custom_fields_list` (and merge tags), `custom_fields_manage` (create, update, delete, set_value), `saved_views_list`, `saved_views_manage` (create, update, delete) |
 | SMS | `sms_send`, `sms_list` (by phone or contact; scheduled), `sms_manage` (cancel_scheduled, delete_thread) |
-| Email | `email_send`, `email_read` (threads, thread, accounts), `email_thread_update` (read / unread, folder) |
+| Email | `email_send`, `email_draft_save` (leaves an email in Drafts for the user to review and send; sends nothing), `email_read` (threads, thread, accounts), `email_thread_update` (read / unread, folder) |
 | Do-not-contact lists | `suppressions_manage` (channel email or sms: list, add, remove) |
 | Templates | `templates_list`, `templates_manage` |
 | Campaigns and sending | `campaigns_manage`, `campaigns_analytics`, `sending_settings`, `resend_manage` |

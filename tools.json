@@ -1397,6 +1397,53 @@
     }
   },
   {
+    "name": "email_draft_save",
+    "title": "Save an email draft",
+    "description": "Save an email to Drafts WITHOUT sending it; the user reviews and sends it from Email, Drafts in the app. Use when asked to draft or prepare an email. Give bodyText and/or bodyHtml. `id` changes an existing draft (email_read threads, folder \"drafts\").",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Change this draft (only the fields passed). Omit for a new one."
+        },
+        "to": {
+          "type": "string",
+          "description": "Address or comma-separated list."
+        },
+        "subject": {
+          "type": "string"
+        },
+        "bodyText": {
+          "type": "string"
+        },
+        "bodyHtml": {
+          "type": "string"
+        },
+        "cc": {
+          "type": "string"
+        },
+        "bcc": {
+          "type": "string"
+        },
+        "contactId": {
+          "type": "string"
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Mailbox it will be sent from. Default: the oldest."
+        }
+      }
+    },
+    "annotations": {
+      "title": "Save an email draft",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "email_read",
     "title": "Read email",
     "description": "Read email. threads (the inbox list, filter by folder / search / account), thread (threadKey: its messages; messageId: one full body), accounts (the mailboxes and send-as addresses email_send can use). Reading does not mark anything read.",
