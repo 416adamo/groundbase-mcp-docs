@@ -92,25 +92,25 @@ With a key set, the tool list and every result come from the hosted server, so t
 
 ## Tools
 
-60 tools, as `tools/list` returns them to a customer account. Each area has a read tool and a `_manage` tool whose `action` says what to do; sending, booking, dropping a voicemail and running a workflow are tools of their own, so a client can tell them apart.
+62 tools, as `tools/list` returns them to a customer account. Each area has a read tool and a `_manage` tool whose `action` says what to do; sending, booking, dropping a voicemail and running a workflow are tools of their own, so a client can tell them apart.
 
 | Area | Tools |
 |---|---|
 | Contacts, companies, deals | `contacts_list` (filters: tag, company, unsubscribed, sort; `deleted`; `duplicates`), `contacts_manage` (create, update, delete, merge, restore, bulk_update), `companies_list`, `companies_manage` (create, update, delete, restore), `deals_list`, `deals_manage` (create, update, delete, restore), `deal_stages_list`, `deal_stages_manage` (create, update, delete) |
 | Tasks, notes, addresses | `tasks_list`, `tasks_manage` (create, update, delete), `notes_list`, `notes_manage`, `addresses_manage` (list, create, update, delete) |
-| Tags, custom fields, saved views | `tags_list`, `tags_manage` (create, update, delete, apply), `custom_fields_list` (and merge tags), `custom_fields_manage` (create, update, delete, set_value), `saved_views_list`, `saved_views_manage` (create, update, delete) |
-| SMS | `sms_send`, `sms_list` (by phone or contact; scheduled), `sms_manage` (cancel_scheduled, delete_thread) |
-| Email | `email_send`, `email_draft_save` (leaves an email in Drafts for the user to review and send; sends nothing), `email_read` (threads, thread, accounts), `email_thread_update` (read / unread, folder) |
+| Tags, custom fields, saved views | `tags_list`, `tags_manage` (create, update, delete, apply to contacts, companies or deals), `custom_fields_list` (and merge tags), `custom_fields_manage` (create, update, delete, set_value), `saved_views_list`, `saved_views_manage` (create, update, delete) |
+| SMS | `sms_send`, `sms_list` (the inbox; by phone or contact; scheduled), `sms_manage` (cancel_scheduled, delete_thread), `missed_call_text` (text-back to unanswered callers) |
+| Email | `email_send`, `email_draft_save` (leaves an email in Drafts for the user to review and send; sends nothing), `email_message_delete` (cancels a scheduled email, deletes a draft or a failed send), `email_read` (threads, thread, accounts), `email_thread_update` (read / unread, folder) |
 | Do-not-contact lists | `suppressions_manage` (channel email or sms: list, add, remove) |
 | Templates | `templates_list`, `templates_manage` |
 | Campaigns and sending | `campaigns_manage`, `campaigns_analytics`, `sending_settings`, `resend_manage` |
 | Invoicing | `invoices_list` (by customer, status, text; payments, credit notes, repeat schedule), `invoices_manage` (save_draft, issue, send, void, public_link, credit_note, send_credit_note, void_credit_note, recurring), `invoice_payments_manage` (record, reverse), `invoice_items_manage`, `billing_profiles_manage`, `invoice_settings` |
 | Quotes | `quotes_list`, `quotes_manage` (save_draft, issue, send, record_outcome, convert, void, public_link) |
 | Time tracking | `time_list`, `time_manage` (start, stop, log, update, delete, bill, unbill) |
-| Documents | `documents_manage` (list, get, templates, send, remind, void) |
+| Documents | `documents_manage` (list, get, templates, send, remind, link, text, void, remove) |
 | Forms | `forms_manage` |
 | Scheduling | `meeting_types_list`, `meeting_types_manage` (create, update, delete), `meetings_book` (slots, book) |
-| Automation | `workflows_list`, `workflows_manage` (create, update, delete), `workflows_run_now`, `inbound_webhooks_manage`, `outbound_webhooks_manage` |
+| Automation | `workflows_list`, `workflows_manage` (create, update, delete), `workflows_run_now`, `inbound_webhooks_manage` (with delivery history and token rotation), `outbound_webhooks_manage` (with delivery history, retry and test) |
 | Calls and voicemail drops | `calls_list`, `phone_status` (numbers and Twilio balance), `voicemail_drops_list`, `voicemail_drops_manage` (create, update, delete), `voicemail_drops_drop` |
 | Context | `activity_list`, `dashboard_summary` (and the pipeline) |
 

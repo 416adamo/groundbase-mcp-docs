@@ -108,6 +108,10 @@
           "type": "string",
           "description": "Used by: create, update. Normalised to E.164."
         },
+        "phoneSecondary": {
+          "type": "string",
+          "description": "Used by: create, update. A second number."
+        },
         "position": {
           "type": "string",
           "description": "Used by: create, update. Job title."
@@ -115,6 +119,14 @@
         "companyId": {
           "type": "string",
           "description": "Used by: create, update."
+        },
+        "city": {
+          "type": "string",
+          "description": "Used by: create, update."
+        },
+        "source": {
+          "type": "string",
+          "description": "Used by: create, update. Where they came from (referral, website...)."
         },
         "notes": {
           "type": "string",
@@ -223,6 +235,10 @@
           "type": "string",
           "description": "Matches name and website."
         },
+        "tag": {
+          "type": "string",
+          "description": "Only companies with this tag (name or id)."
+        },
         "deleted": {
           "type": "boolean",
           "description": "List recently deleted companies instead (to restore)."
@@ -250,7 +266,7 @@
   {
     "name": "companies_manage",
     "title": "Manage companies",
-    "description": "Change companies. create (name required; tags by name), update (omitted fields unchanged), delete (soft; confirm first), restore (ids from companies_list deleted).",
+    "description": "Change companies. create (name required; tags by name), update (omitted fields unchanged; tags later: tags_manage apply), delete (soft; confirm first), restore (ids from companies_list deleted).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -380,7 +396,7 @@
   {
     "name": "deals_manage",
     "title": "Manage deals",
-    "description": "Change deals. create (title and stageId from deal_stages_list), update (stageId moves it; omitted fields unchanged), delete (soft; confirm first), restore (ids from deals_list deleted).",
+    "description": "Change deals. create (title and stageId from deal_stages_list), update (stageId moves it; omitted fields unchanged; tags: tags_manage apply), delete (soft; confirm first), restore (ids from deals_list deleted).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -675,7 +691,18 @@
             "weekdays",
             ""
           ],
-          "description": "Used by: create, update. Repeats relative to dueAt. Tasks only."
+          "description": "Used by: create, update. Repeats from dueAt (startAt for an event or meeting)."
+        },
+        "repeatUntil": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Used by: create, update. Repeating: last date, YYYY-MM-DD. Omit for no end."
+        },
+        "isPriority": {
+          "type": "boolean",
+          "description": "Used by: create, update. Starred as a priority."
         },
         "textContact": {
           "type": "boolean",
@@ -709,6 +736,10 @@
             "open",
             "done"
           ]
+        },
+        "future": {
+          "type": "boolean",
+          "description": "Repeating: also change every later date of the series (\"this and all future\"). Default: this date only."
         },
         "scope": {
           "type": "string",
@@ -908,7 +939,7 @@
   {
     "name": "tags_manage",
     "title": "Manage tags",
-    "description": "Tags. create, update (rename / recolour), delete (removes it from everyone; confirm first), apply (tagId to contactIds; remove: true takes it off). Applying a tag can start workflows listening for it.",
+    "description": "Tags. create, update (rename / recolour), delete (removes it from everyone; confirm first), apply (tagId to contactIds, companyIds and/or dealIds; remove: true takes it off). Applying a tag can start workflows listening for it.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -942,6 +973,20 @@
             "type": "string"
           },
           "maxItems": 500
+        },
+        "companyIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100
+        },
+        "dealIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100
         },
         "remove": {
           "type": "boolean",
@@ -1105,7 +1150,9 @@
             "text",
             "number",
             "date",
-            "select"
+            "select",
+            "url",
+            "email"
           ]
         },
         "options": {
@@ -1193,10 +1240,23 @@
   {
     "name": "sms_list",
     "title": "List texts",
-    "description": "Read the text conversation with a `phone` or `contactId` (oldest first, both directions; `matched: false` if none), or pass `scheduled: true` to list texts queued to send.",
+    "description": "Texts. inbox: true lists conversations newest first (last message, its direction, unread count; `since` for \"who texted me today\"). Or the conversation with a `phone` or `contactId` (oldest first, both directions; `matched: false` if none), or `scheduled: true` for texts queued to send.",
     "inputSchema": {
       "type": "object",
       "properties": {
+        "inbox": {
+          "type": "boolean",
+          "description": "List conversations (the Texts inbox; campaign and bulk texts nobody answered are left out)."
+        },
+        "since": {
+          "type": "string",
+          "description": "inbox: only conversations with a message at or after this ISO 8601 time."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "inbox: for the next page."
+        },
         "phone": {
           "type": "string",
           "description": "The other party's number, any format."
@@ -1213,7 +1273,7 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 200,
-          "description": "Conversation only. Default 50."
+          "description": "Default 50 (inbox 25)."
         }
       }
     },
@@ -1223,6 +1283,40 @@
       "destructiveHint": false,
       "idempotentHint": true,
       "openWorldHint": false
+    }
+  },
+  {
+    "name": "missed_call_text",
+    "title": "Missed-call text-back",
+    "description": "Missed-call text-back: a text sent automatically to a caller nobody answered. get (enabled, message, the default and a preview), or set (enabled and/or message; \"\" = the default). Turning it on texts real callers from the user's number later, unattended; confirm with the user first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "get",
+            "set"
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "description": "set: the text; {{business_name}} fills in. \"\" = the default."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "title": "Missed-call text-back",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true
     }
   },
   {
@@ -1337,7 +1431,7 @@
   {
     "name": "email_send",
     "title": "Send an email",
-    "description": "Send a real email from the user's connected mailbox (default: the oldest one). Give bodyHtml and/or bodyText. Pass contactId so merge tags resolve and the email threads to that contact. At most 50 recipients (to+cc+bcc); a list is a campaign. One-to-one mail ignores the campaign suppression list. Confirm with the user first.",
+    "description": "Send a real email from the user's connected mailbox (default: the oldest one). Give bodyHtml and/or bodyText. Pass contactId so merge tags resolve and the email threads to that contact. To reply in a conversation pass inReplyTo. At most 50 recipients (to+cc+bcc); a list is a campaign. One-to-one mail ignores the campaign suppression list. Confirm with the user first.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1381,6 +1475,14 @@
         "scheduledSendAt": {
           "type": "string",
           "description": "Future ISO 8601 time to send at."
+        },
+        "inReplyTo": {
+          "type": "string",
+          "description": "Reply: the message_id (\"<...>\") of the message answered, from email_read thread."
+        },
+        "threadId": {
+          "type": "string",
+          "description": "Reply: that conversation's thread_id (used if inReplyTo is not found)."
         }
       },
       "required": [
@@ -1444,6 +1546,29 @@
     }
   },
   {
+    "name": "email_message_delete",
+    "title": "Cancel or delete an unsent email",
+    "description": "Cancel a scheduled email before it goes, or delete a draft or a failed send. id = latest_message_id from email_read threads (folder scheduled, drafts or outbox-failed). Sent and received mail cannot be deleted here. Confirm first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "annotations": {
+      "title": "Cancel or delete an unsent email",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "email_read",
     "title": "Read email",
     "description": "Read email. threads (the inbox list, filter by folder / search / account), thread (threadKey: its messages; messageId: one full body), accounts (the mailboxes and send-as addresses email_send can use). Reading does not mark anything read.",
@@ -1468,10 +1593,11 @@
             "inbox",
             "sent",
             "archive",
-            "trash",
-            "drafts"
+            "drafts",
+            "scheduled",
+            "outbox-failed"
           ],
-          "description": "Default: all."
+          "description": "Default: all. scheduled = queued to send; outbox-failed = sends that failed."
         },
         "account": {
           "type": "string",
@@ -1814,6 +1940,10 @@
           },
           "description": "Used by: create, update."
         },
+        "statusId": {
+          "type": "string",
+          "description": "Used by: create, update. Contact status given to people who book (name or id, from deal_stages_list contact_statuses); \"\" = none."
+        },
         "id": {
           "type": "string",
           "description": "Required for: update, delete."
@@ -2046,7 +2176,7 @@
   {
     "name": "inbound_webhooks_manage",
     "title": "Manage inbound webhooks",
-    "description": "Inbound webhooks: manage the URLs other services POST to (settings only; runs nothing). action list | get | create | update | delete. create returns the full URL with its token ONCE (tell the user; it cannot be shown again). delete stops the URL accepting posts immediately; confirm first.",
+    "description": "Inbound webhooks: manage the URLs other services POST to (settings only; runs nothing). action list | get | create | update | delete | deliveries (the last 100 posts and what each did) | rotate_token (a new URL; the old one stops at once). create and rotate_token return the full URL with its token ONCE (tell the user). delete and rotate_token break what posts to it: confirm first.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2057,12 +2187,14 @@
             "get",
             "create",
             "update",
-            "delete"
+            "delete",
+            "deliveries",
+            "rotate_token"
           ]
         },
         "id": {
           "type": "string",
-          "description": "For get/update/delete."
+          "description": "For every action but list and create."
         },
         "name": {
           "type": "string",
@@ -2114,7 +2246,7 @@
   {
     "name": "outbound_webhooks_manage",
     "title": "Manage outbound webhooks",
-    "description": "Outbound webhooks: Groundbase POSTs to a URL when subscribed events fire. action list | get | create | update | delete. create needs name, url, events and returns the signing secret ONCE (tell the user). create, or a new url, sends CRM data (names, emails, phones) there and emails the owner: confirm the url with the user first. delete stops deliveries and abandons retries; confirm first.",
+    "description": "Outbound webhooks: Groundbase POSTs to a URL when subscribed events fire. action list | get | create | update | delete | deliveries (recent attempts and replies) | retry (a failed one) | test (one sample event). create needs name, url, events and returns the signing secret ONCE (tell the user). A new url gets CRM data (names, emails, phones) and emails the owner: confirm it first. Confirm delete.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2125,12 +2257,25 @@
             "get",
             "create",
             "update",
-            "delete"
+            "delete",
+            "deliveries",
+            "retry",
+            "test"
           ]
         },
         "id": {
           "type": "string",
-          "description": "For get/update/delete."
+          "description": "For every action but list and create."
+        },
+        "deliveryId": {
+          "type": "string",
+          "description": "retry: from deliveries."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "deliveries: default 50."
         },
         "name": {
           "type": "string",
@@ -2271,7 +2416,7 @@
   {
     "name": "documents_manage",
     "title": "Manage documents",
-    "description": "Documents sent for signing. list (status/contactId), get (id: signers + history), templates (saved forms and their signer roles), send (a template; emails each signer, confirm first), remind (email whoever is due to sign; confirm first), void (cancel a waiting one for good). Statuses: sent = waiting, completed = signed by all, declined, voided.",
+    "description": "Documents for signing. list, get (signers, history), templates (roles, fields), send (a template; emails signers), remind (emails who is due), link (a signer's link, to share in person), text (texts it), void (cancel a waiting one), remove (a finished one). Confirm send, remind and text. Statuses: sent = waiting, completed, declined, voided.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2283,12 +2428,15 @@
             "templates",
             "send",
             "remind",
-            "void"
+            "link",
+            "text",
+            "void",
+            "remove"
           ]
         },
         "id": {
           "type": "string",
-          "description": "get / remind / void: the document id."
+          "description": "get / remind / link / text / void / remove: the document id."
         },
         "status": {
           "type": "string",
@@ -2338,9 +2486,17 @@
           "type": "boolean",
           "description": "send: sign one after another in role order (the user last)."
         },
+        "prefill": {
+          "type": "object",
+          "description": "send: values for the template's \"before sending\" fields (role _before_sending), { fieldId: value }; {{first_name}} tags fill in."
+        },
         "signerId": {
           "type": "string",
-          "description": "remind: just this signer."
+          "description": "remind: just this signer. link / text: required (from get)."
+        },
+        "phone": {
+          "type": "string",
+          "description": "text: the mobile number, if the signer is not a contact with one."
         },
         "reason": {
           "type": "string",
@@ -2850,6 +3006,10 @@
         "companyId": {
           "type": "string"
         },
+        "billingProfileId": {
+          "type": "string",
+          "description": "Bill to this profile (billing_profiles_manage list). Default: the customer's."
+        },
         "currency": {
           "type": "string",
           "description": "ISO 4217. Defaults from the billing profile."
@@ -2924,6 +3084,13 @@
               },
               "taxRate": {
                 "type": "string"
+              },
+              "taxIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Which of the document taxes apply (default none)."
               }
             }
           }
@@ -2948,6 +3115,10 @@
           ],
           "description": "Default: their own mailbox, then Resend, then Groundbase's address."
         },
+        "fromEmail": {
+          "type": "string",
+          "description": "Send from this address: a mailbox or send-as alias (email_read accounts)."
+        },
         "subject": {
           "type": "string",
           "description": "Default: the invoice settings subject."
@@ -2955,6 +3126,10 @@
         "message": {
           "type": "string",
           "description": "A note above the invoice in the email."
+        },
+        "attachPdf": {
+          "type": "boolean",
+          "description": "Default true; false sends the link only."
         },
         "confirm_paid": {
           "type": "boolean",
@@ -2971,6 +3146,13 @@
         "taxRate": {
           "type": "string",
           "description": "credit_note: percent, e.g. \"13\"."
+        },
+        "taxIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "credit_note: which of the invoice's taxes it carries (default all)."
         },
         "reason": {
           "type": "string",
@@ -3215,7 +3397,7 @@
   {
     "name": "invoice_settings",
     "title": "Invoice settings",
-    "description": "Invoice settings: business details on invoices and receipts, payment instructions, numbering. get, or set (omitted fields unchanged; nextNumber only moves forward).",
+    "description": "Invoice settings: business details and logo, payment instructions, email wording, numbering, currencies, tax rates and numbers, overdue reminders, time billing. get, or set (omitted fields unchanged; nextNumber only moves forward).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3239,7 +3421,23 @@
           "type": "string"
         },
         "businessTaxId": {
+          "type": "string",
+          "description": "One bare number; taxNumbers (labelled) are printed instead when set."
+        },
+        "businessWebsite": {
           "type": "string"
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "An https:// image address (\"\" removes it). Uploading a file is done in the app."
+        },
+        "emailSubject": {
+          "type": "string",
+          "description": "Invoice email subject; tokens {number} {business} {customer} {amount} {due}. \"\" = the default."
+        },
+        "emailMessage": {
+          "type": "string",
+          "description": "Invoice email message; same tokens. \"\" = the default."
         },
         "paymentInstructions": {
           "type": "string",
@@ -3267,6 +3465,100 @@
         },
         "nextNumber": {
           "type": "number"
+        },
+        "currencies": {
+          "type": "object",
+          "description": "Other currencies billed in: { \"USD\": \"0.73\" } (1 of the default currency = this many); \"\" fetches a rate. Replaces the list."
+        },
+        "taxPresets": {
+          "type": "array",
+          "maxItems": 20,
+          "description": "Saved tax rates offered on new lines: [{ name, rate (\"13\"), is_default? }]. Replaces the list.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "rate": {
+                "type": "string"
+              },
+              "is_default": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "rate"
+            ]
+          }
+        },
+        "taxNumbers": {
+          "type": "array",
+          "maxItems": 6,
+          "description": "Printed tax registrations: [{ label (\"GST/HST #\"), number }]. Replaces the list.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "number"
+            ]
+          }
+        },
+        "reminders": {
+          "type": "object",
+          "description": "Overdue reminders emailed to customers: { enabled, days (after due, up to 5, 1-90), before (days before due, up to 2) }. Omitted keys stay. Switching on emails customers; confirm.",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "before": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "timeBilling": {
+          "type": "object",
+          "description": "Time on invoices: { rounding_minutes 0|6|10|15|30, rounding_mode up|nearest, default_rate (\"90\", or \"\" for none) }. Omitted keys stay.",
+          "properties": {
+            "rounding_minutes": {
+              "type": "integer",
+              "enum": [
+                0,
+                6,
+                10,
+                15,
+                30
+              ]
+            },
+            "rounding_mode": {
+              "type": "string",
+              "enum": [
+                "up",
+                "nearest"
+              ]
+            },
+            "default_rate": {
+              "type": "string"
+            }
+          }
         }
       },
       "required": [
@@ -3278,7 +3570,7 @@
       "readOnlyHint": false,
       "destructiveHint": false,
       "idempotentHint": true,
-      "openWorldHint": false
+      "openWorldHint": true
     }
   },
   {
@@ -3435,6 +3727,13 @@
               },
               "taxRate": {
                 "type": "string"
+              },
+              "taxIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Which of the document taxes apply (default none)."
               }
             }
           }
@@ -3462,8 +3761,14 @@
           "type": "string",
           "enum": [
             "smtp",
-            "resend"
-          ]
+            "resend",
+            "groundbase"
+          ],
+          "description": "Default: their own mailbox, then Resend, then Groundbase's address."
+        },
+        "fromEmail": {
+          "type": "string",
+          "description": "Send from this address: a mailbox or send-as alias (email_read accounts)."
         },
         "outcome": {
           "type": "string",
