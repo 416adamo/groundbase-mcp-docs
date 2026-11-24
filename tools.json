@@ -12,7 +12,7 @@
         },
         "search": {
           "type": "string",
-          "description": "Matches name, email, phone."
+          "description": "Matches name, email, either phone (typed any way, e.g. 647-555-1234), company name and city."
         },
         "tag": {
           "type": "string",
