@@ -1,5 +1,7 @@
 # Groundbase MCP Server
 
+[![Groundbase MCP connector – tool definition quality and endpoint health on Glama](https://glama.ai/mcp/connectors/com.groundbasecrm.mcp/groundbase/badges/score.svg)](https://glama.ai/mcp/connectors/com.groundbasecrm.mcp/groundbase)
+
 Connect Claude, Cursor, or any MCP client to [Groundbase](https://groundbasecrm.com), a $19/month CRM for solo operators.
 
 This is a **remote** MCP server. Most clients point at a URL and authenticate, with nothing to install or run. For a client that can only start a local process, this repo also holds a small local bridge to the same server: see [Run it locally](#run-it-locally-stdio).
